@@ -9,20 +9,20 @@ import (
 func TestBandits0(t *testing.T) {
 	Convey("TestBandits0", t, func() {
 		var (
-			state  common.Stater
+			info   common.Info
 			reward float64
 			accum  common.Accumulate
 		)
 		var env = NewBanditsEnv(5)
-		state = env.Reset()
-		accum = common.NewReward1D(env.ActionSpace())
+		env.Reset()
+		accum = common.NewAccum()
 		for count := 0; count < 10; count++ {
 			var act = env.ActionSpace().Sample()
-			state, reward, _ = env.Step(act)
+			_, reward, _, info = env.Step(act)
 			accum.Add(act, reward)
 		}
 		env.Close()
-		t.Log(state)
+		t.Log(info)
 		t.Log(accum)
 	})
 }

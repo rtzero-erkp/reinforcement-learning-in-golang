@@ -8,23 +8,22 @@ import (
 var _ Agent = &EpsilonGreed{}
 
 type EpsilonGreed struct {
-	epsilon float64           // 概率
-	accum   common.Accumulate // 累计收益
-	policy  common.Policy     // 策略梯度
-	space   common.Space      // 行动空间
+	epsilon float64      // 概率
+	model   common.Tree  // 模型
 }
 
-func (p *EpsilonGreed) Policy(common.Space) common.Policy {
+func (p *EpsilonGreed) Policy(state []int, space common.Space) common.Policy {
+	var node = p.model.Find(state)
 	var rate = rand.Float64()
 	if rate < p.epsilon {
-		p.policy.Clean()
-		p.policy.Set(p.space.Sample(), 1)
+		node.Policy().Clean()
+		node.Policy().Set(space.Sample(), 1)
 	} else {
 		var qMax float64
 		var actsMax []common.ActionEnum
 
-		for _, act := range p.space.Acts() {
-			var q = p.accum.Mean(act)
+		for _, act := range space.Acts() {
+			var q = node.Accum().Mean(act)
 			if (len(actsMax) == 0) || (q > qMax) {
 				qMax = q
 				actsMax = append(actsMax, act)
@@ -34,23 +33,22 @@ func (p *EpsilonGreed) Policy(common.Space) common.Policy {
 			}
 		}
 
-		p.policy.Clean()
+		node.Policy().Clean()
 		for _, act := range actsMax {
-			p.policy.Set(act, 1)
+			node.Policy().Set(act, 1)
 		}
 	}
-	return p.policy
+	return node.Policy()
 }
-func (p *EpsilonGreed) Reward(act common.ActionEnum, reward float64) {
-	p.accum.Add(act, reward)
+func (p *EpsilonGreed) Reward(state []int, act common.ActionEnum, reward float64) {
+	var node = p.model.Find(state)
+	node.Accum().Add(act, reward)
 }
 
-func NewEpsilonGreed(space common.Space, epsilon float64) Agent {
+func NewEpsilonGreed(epsilon float64) Agent {
 	var p = &EpsilonGreed{
 		epsilon: epsilon,
-		accum:   common.NewReward1D(space),
-		policy:  common.NewPolicyPlus(),
-		space:   space,
+		model:   common.NewRootNode(),
 	}
 	return p
 }

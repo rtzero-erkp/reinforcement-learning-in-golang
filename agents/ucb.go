@@ -8,30 +8,28 @@ import (
 var _ Agent = &UCB{}
 
 type UCB struct {
-	epsilon float64           // 概率
-	accum   common.Accumulate // 累计收益
-	policy  common.Policy     // 策略梯度
-	space   common.Space      // 行动空间
+	model   common.Tree // 模型
 }
 
-func (p *UCB) Policy(common.Space) common.Policy {
-	countSum := p.accum.Count()
+func (p *UCB) Policy(state []int, space common.Space) common.Policy {
+	var node = p.model.Find(state)
+	countSum := node.Accum().Count()
 	if countSum == 0 {
-		p.policy.Clean()
-		p.policy.Set(p.space.Sample(), 1)
-		return p.policy
+		node.Policy().Clean()
+		node.Policy().Set(space.Sample(), 1)
+		return node.Policy()
 	}
 	var actsMax []common.ActionEnum
 	var ucbMax float64
-	for _, act := range p.space.Acts() {
-		count := p.accum.CountAct(act)
+	for _, act := range space.Acts() {
+		count := node.Accum().CountAct(act)
 		if count == 0 {
-			p.policy.Clean()
-			p.policy.Set(act, 1)
-			return p.policy
+			node.Policy().Clean()
+			node.Policy().Set(act, 1)
+			return node.Policy()
 		}
 		upperBound := math.Sqrt((2 * math.Log(countSum)) / count)
-		q := p.accum.Mean(act)
+		q := node.Accum().Mean(act)
 		ucb := upperBound + q
 		if (len(actsMax) == 0) || ucb > ucbMax {
 			ucbMax = ucb
@@ -41,22 +39,20 @@ func (p *UCB) Policy(common.Space) common.Policy {
 			actsMax = append(actsMax, act)
 		}
 	}
-	p.policy.Clean()
+	node.Policy().Clean()
 	for _, act := range actsMax {
-		p.policy.Set(act, 1)
+		node.Policy().Set(act, 1)
 	}
-	return p.policy
+	return node.Policy()
 }
-func (p *UCB) Reward(act common.ActionEnum, reward float64) {
-	p.accum.Add(act, reward)
+func (p *UCB) Reward(state []int, act common.ActionEnum, reward float64) {
+	var node = p.model.Find(state)
+	node.Accum().Add(act, reward)
 }
 
-func NewUCB(space common.Space, epsilon float64) Agent {
+func NewUCB() Agent {
 	var p = &UCB{
-		epsilon: epsilon,
-		accum:   common.NewReward1D(space),
-		policy:  common.NewPolicyPlus(),
-		space:   space,
+		model:   common.NewRootNode(),
 	}
 	return p
 }

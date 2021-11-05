@@ -2,34 +2,19 @@ package common
 
 import "fmt"
 
-type Stater interface {
-	GetFloat64(key string) float64
-	SetFloat64(key string, val float64)
-	String() string
-}
+type State []float64
 
-var _ Stater = &State{}
-
-type State struct {
-	float64s map[string]float64
-}
-
-func NewState() *State {
-	return &State{
-		float64s: map[string]float64{},
+func (p State) Encode(mesh []float64) []int {
+	var code []int
+	for i, v := range p {
+		code = append(code, int(v*mesh[i]))
 	}
+	return code
 }
-func (p *State) GetFloat64(key string) float64 {
-	return p.float64s[key]
-}
-func (p *State) SetFloat64(key string, val float64) {
-	p.float64s[key] = val
-}
-
-func (p *State) String() string {
-	var line = "\n"
-	for k, v := range p.float64s {
-		line += fmt.Sprintf("[state] key:%v, val:%10.7f\n", k, v)
+func (p State) String() string {
+	var line = "[stateVec]"
+	for _, v := range p {
+		line += fmt.Sprintf(" %10.7f", v)
 	}
 	return line
 }

@@ -15,17 +15,17 @@ const (
 	ActionEnum_Left  ActionEnum = 20103
 )
 
-func Action2Str(act ActionEnum) string {
-	switch act {
+func (p ActionEnum) String() string {
+	switch p {
 	case ActionEnum_Up:
-		return "Up"
+		return "[Act] Up"
 	case ActionEnum_Down:
-		return "Down"
+		return "[Act] Down"
 	case ActionEnum_Right:
-		return "Right"
+		return "[Act] Right"
 	case ActionEnum_Left:
-		return "Left"
+		return "[Act] Left"
 	default:
-		return fmt.Sprintf("%v", int(act))
+		return fmt.Sprintf("[Act] %v", int(p))
 	}
 }
