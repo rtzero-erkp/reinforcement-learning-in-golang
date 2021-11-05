@@ -6,7 +6,6 @@ import (
 	"log"
 	"math"
 	"math/rand"
-	"time"
 )
 
 var _ Env = &CartPoleEnv{}
@@ -55,7 +54,7 @@ func NewCartPoleEnv() Env {
 			common.ActionEnum_Left,
 			common.ActionEnum_Right,
 		),
-		rand: rand.New(rand.NewSource(time.Now().Unix())),
+		rand: rand.New(rand.NewSource(rand.Int63())),
 	}
 
 }

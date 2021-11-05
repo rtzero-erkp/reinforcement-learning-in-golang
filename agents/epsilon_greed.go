@@ -8,11 +8,10 @@ import (
 var _ Agent = &EpsilonGreed{}
 
 type EpsilonGreed struct {
-	epsilon   float64                       // 概率
-	rewardCum map[common.ActionEnum]float64 // 累计收益
-	countCum  map[common.ActionEnum]float64 // 累计次数
-	policy    common.Policy                 // 策略梯度
-	space     common.Space                  // 行动空间
+	epsilon float64           // 概率
+	accum   common.Accumulate // 累计收益
+	policy  common.Policy     // 策略梯度
+	space   common.Space      // 行动空间
 }
 
 func (p *EpsilonGreed) Policy(common.Space) common.Policy {
@@ -25,14 +24,10 @@ func (p *EpsilonGreed) Policy(common.Space) common.Policy {
 		var actsMax []common.ActionEnum
 
 		for _, act := range p.space.Acts() {
-			var q = p.rewardMean(act)
-			if len(actsMax) == 0 {
+			var q = p.accum.Mean(act)
+			if (len(actsMax) == 0) || (q > qMax) {
 				qMax = q
 				actsMax = append(actsMax, act)
-			} else
-			if q > qMax {
-				qMax = q
-				actsMax = []common.ActionEnum{act}
 			} else
 			if q == qMax {
 				actsMax = append(actsMax, act)
@@ -47,29 +42,15 @@ func (p *EpsilonGreed) Policy(common.Space) common.Policy {
 	return p.policy
 }
 func (p *EpsilonGreed) Reward(act common.ActionEnum, reward float64) {
-	p.rewardCum[act] += reward
-	p.countCum[act] += 1
+	p.accum.Add(act, reward)
 }
 
 func NewEpsilonGreed(space common.Space, epsilon float64) Agent {
 	var p = &EpsilonGreed{
-		epsilon:   epsilon,
-		rewardCum: map[common.ActionEnum]float64{},
-		countCum:  map[common.ActionEnum]float64{},
-		policy:    common.NewPolicyPlus(),
-		space:     space,
-	}
-	for _, act := range p.space.Acts() {
-		p.rewardCum[act] = 0
-		p.countCum[act] = 0
+		epsilon: epsilon,
+		accum:   common.NewReward1D(space),
+		policy:  common.NewPolicyPlus(),
+		space:   space,
 	}
 	return p
-}
-
-func (p *EpsilonGreed) rewardMean(act common.ActionEnum) float64 {
-	if p.countCum[act] == 0 {
-		return 0
-	} else {
-		return p.rewardCum[act] / p.countCum[act]
-	}
 }

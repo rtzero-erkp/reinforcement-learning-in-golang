@@ -5,7 +5,6 @@ import (
 	"gameServer/common"
 	"log"
 	"math/rand"
-	"time"
 )
 
 var _ Env = &BanditsEnv{}
@@ -27,7 +26,7 @@ func NewBanditsEnv(banditsNum int) Env {
 		state:           common.NewState(),
 		stepsBeyondDone: 0,
 		space:           common.NewSpace1DByNum(banditsNum),
-		rand:            rand.New(rand.NewSource(time.Now().Unix())),
+		rand:            rand.New(rand.NewSource(rand.Int63())),
 	}
 }
 

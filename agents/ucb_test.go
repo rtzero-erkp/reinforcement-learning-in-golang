@@ -7,19 +7,18 @@ import (
 	"testing"
 )
 
-func TestEpsilonGreed0(t *testing.T) {
-	Convey("TestEpsilonGreed0", t, func() {
+func TestUCB0(t *testing.T) {
+	Convey("TestUCB0", t, func() {
 		var (
-			space  common.Space
 			state  common.Stater
 			reward float64
 			accum  common.Accumulate
 		)
 		var env = envs.NewBanditsEnv(5)
 		state = env.Reset()
-		space = env.ActionSpace()
+		space := env.ActionSpace()
 		accum = common.NewReward1D(env.ActionSpace())
-		var agent = NewEpsilonGreed(space, 0.5)
+		var agent = NewUCB(space, 0.5)
 		for count := 0; count < 100; count++ {
 			policy := agent.Policy(space)
 			act := policy.Sample()

@@ -9,21 +9,21 @@ import (
 func TestCartPole0(t *testing.T) {
 	Convey("TestCartPole0", t, func() {
 		var (
-			state     common.Stater
+			state  common.Stater
 			reward float64
 			done   = false
-			rewardCum common.Reward
+			accum  common.Accumulate
 		)
 		var env = NewCartPoleEnv()
 		env.Reset()
-		rewardCum = common.NewReward1D(env.ActionSpace())
+		accum = common.NewReward1D(env.ActionSpace())
 		for !done {
 			var act = env.ActionSpace().Sample()
 			state, reward, done = env.Step(act)
-			rewardCum.Add(act, reward)
+			accum.Add(act, reward)
 		}
 		env.Close()
 		t.Log(state)
-		t.Log(rewardCum)
+		t.Log(accum)
 	})
 }

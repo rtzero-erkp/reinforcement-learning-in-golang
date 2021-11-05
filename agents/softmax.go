@@ -9,17 +9,16 @@ import (
 var _ Agent = &SoftMax{}
 
 type SoftMax struct {
-	tau       float64                       // 概率
-	rewardCum map[common.ActionEnum]float64 // 累计收益
-	countCum  map[common.ActionEnum]float64 // 累计次数
-	policy    common.Policy                 // 策略梯度
-	space     common.Space                  // 行动空间
+	tau    float64           // 概率
+	accum  common.Accumulate // 累计收益
+	policy common.Policy     // 策略梯度
+	space  common.Space      // 行动空间
 }
 
 func (p *SoftMax) Policy(common.Space) common.Policy {
 	var probSum float64 = 0
 	for _, act := range p.space.Acts() {
-		var q = p.rewardMean(act)
+		var q = p.accum.Mean(act)
 		probSum += math.Exp(q / p.tau)
 	}
 	var rate = rand.Float64()
@@ -27,7 +26,7 @@ func (p *SoftMax) Policy(common.Space) common.Policy {
 	var probMax float64 = 0
 	var actsMax []common.ActionEnum
 	for _, act := range p.space.Acts() {
-		var q = p.rewardMean(act)
+		var q = p.accum.Mean(act)
 		var prob = math.Exp(q/p.tau) / probSum
 		probCum += prob
 		if probCum > rate {
@@ -50,29 +49,15 @@ func (p *SoftMax) Policy(common.Space) common.Policy {
 	return p.policy
 }
 func (p *SoftMax) Reward(act common.ActionEnum, reward float64) {
-	p.rewardCum[act] += reward
-	p.countCum[act] += 1
+	p.accum.Add(act, reward)
 }
 
 func NewSoftMax(space common.Space, tau float64) Agent {
 	var p = &SoftMax{
-		tau:       tau,
-		rewardCum: map[common.ActionEnum]float64{},
-		countCum:  map[common.ActionEnum]float64{},
-		policy:    common.NewPolicyPlus(),
-		space:     space,
-	}
-	for _, act := range p.space.Acts() {
-		p.rewardCum[act] = 0
-		p.countCum[act] = 0
+		tau:    tau,
+		accum:  common.NewReward1D(space),
+		policy: common.NewPolicyPlus(),
+		space:  space,
 	}
 	return p
-}
-
-func (p *SoftMax) rewardMean(act common.ActionEnum) float64 {
-	if p.countCum[act] == 0 {
-		return 0
-	} else {
-		return p.rewardCum[act] / p.countCum[act]
-	}
 }

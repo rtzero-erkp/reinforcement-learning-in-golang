@@ -29,7 +29,7 @@ func (p *State) SetFloat64(key string, val float64) {
 func (p *State) String() string {
 	var line = "\n"
 	for k, v := range p.float64s {
-		line += fmt.Sprintf("[state] %v : %10.7f\n", k, v)
+		line += fmt.Sprintf("[state] key:%v, val:%10.7f\n", k, v)
 	}
 	return line
 }
