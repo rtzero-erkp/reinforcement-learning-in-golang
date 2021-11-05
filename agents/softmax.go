@@ -11,10 +11,11 @@ var _ Agent = &SoftMax{}
 type SoftMax struct {
 	tau   float64     // 概率
 	model common.Tree // 模型
+	mesh  []float64
 }
 
-func (p *SoftMax) Policy(state []int, space common.Space) common.Policy {
-	var node = p.model.Find(state)
+func (p *SoftMax) Policy(state common.State, space common.Space) common.Policy {
+	var node = p.model.Find(state.Encode(p.mesh))
 	var probSum float64 = 0
 	for _, act := range space.Acts() {
 		var q = node.Accum().Mean(act)
@@ -47,15 +48,16 @@ func (p *SoftMax) Policy(state []int, space common.Space) common.Policy {
 	}
 	return node.Policy()
 }
-func (p *SoftMax) Reward(state []int, act common.ActionEnum, reward float64) {
-	var node = p.model.Find(state)
+func (p *SoftMax) Reward(state common.State, act common.ActionEnum, reward float64) {
+	var node = p.model.Find(state.Encode(p.mesh))
 	node.Accum().Add(act, reward)
 }
 
-func NewSoftMax(tau float64) Agent {
+func NewSoftMax(tau float64, mesh []float64) Agent {
 	var p = &SoftMax{
 		tau:   tau,
 		model: common.NewRootNode(),
+		mesh:  mesh,
 	}
 	return p
 }

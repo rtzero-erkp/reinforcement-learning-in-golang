@@ -1,7 +1,7 @@
 package common
 
 type Memory struct {
-	Code   []int
+	State  State
 	Act    ActionEnum
 	Reward float64
 }
@@ -16,8 +16,9 @@ func NewMemory() *Memories {
 	}
 }
 
-func (p *Memories) Add(code []int, act ActionEnum, reward float64) {
-	p.mem = append(p.mem, &Memory{Code: code, Act: act, Reward: reward})
+func (p *Memories) Add(state State, act ActionEnum, reward float64) {
+	var mem = &Memory{State: state.Clone(), Act: act, Reward: reward}
+	p.mem = append(p.mem, mem)
 }
 
 func (p *Memories) Clear() {

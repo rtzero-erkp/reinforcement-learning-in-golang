@@ -8,12 +8,13 @@ import (
 var _ Agent = &EpsilonGreed{}
 
 type EpsilonGreed struct {
-	epsilon float64      // 概率
-	model   common.Tree  // 模型
+	epsilon float64     // 概率
+	model   common.Tree // 模型
+	mesh    []float64
 }
 
-func (p *EpsilonGreed) Policy(state []int, space common.Space) common.Policy {
-	var node = p.model.Find(state)
+func (p *EpsilonGreed) Policy(state common.State, space common.Space) common.Policy {
+	var node = p.model.Find(state.Encode(p.mesh))
 	var rate = rand.Float64()
 	if rate < p.epsilon {
 		node.Policy().Clean()
@@ -40,15 +41,16 @@ func (p *EpsilonGreed) Policy(state []int, space common.Space) common.Policy {
 	}
 	return node.Policy()
 }
-func (p *EpsilonGreed) Reward(state []int, act common.ActionEnum, reward float64) {
-	var node = p.model.Find(state)
+func (p *EpsilonGreed) Reward(state common.State, act common.ActionEnum, reward float64) {
+	var node = p.model.Find(state.Encode(p.mesh))
 	node.Accum().Add(act, reward)
 }
 
-func NewEpsilonGreed(epsilon float64) Agent {
+func NewEpsilonGreed(epsilon float64, mesh []float64) Agent {
 	var p = &EpsilonGreed{
 		epsilon: epsilon,
 		model:   common.NewRootNode(),
+		mesh:    mesh,
 	}
 	return p
 }

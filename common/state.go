@@ -11,6 +11,13 @@ func (p State) Encode(mesh []float64) []int {
 	}
 	return code
 }
+func (p State) Clone() State {
+	var cp = State{}
+	for _, v := range p {
+		cp = append(cp, v)
+	}
+	return cp
+}
 func (p State) String() string {
 	var line = "[stateVec]"
 	for _, v := range p {

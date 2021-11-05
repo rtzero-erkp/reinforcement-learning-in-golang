@@ -9,7 +9,7 @@ import (
 func TestBandits0(t *testing.T) {
 	Convey("TestBandits0", t, func() {
 		var (
-			info   common.Info
+			res    = &Result{}
 			reward float64
 			accum  common.Accumulate
 		)
@@ -18,11 +18,11 @@ func TestBandits0(t *testing.T) {
 		accum = common.NewAccum()
 		for count := 0; count < 10; count++ {
 			var act = env.ActionSpace().Sample()
-			_, reward, _, info = env.Step(act)
+			res = env.Step(act)
 			accum.Add(act, reward)
 		}
 		env.Close()
-		t.Log(info)
+		t.Log(res.Info)
 		t.Log(accum)
 	})
 }

@@ -74,7 +74,7 @@ func (p *CartPoleEnv) Seed(seed int64) rand.Source {
 	p.rand = rand.New(source)
 	return source
 }
-func (p *CartPoleEnv) Step(act common.ActionEnum) (state common.State, reward float64, done bool, info common.Info) {
+func (p *CartPoleEnv) Step(act common.ActionEnum) (res *Result) {
 	if !p.space.Contain(act) {
 		log.Fatal(fmt.Sprintf("actions space not contain act:%v", act))
 	}
@@ -119,20 +119,21 @@ func (p *CartPoleEnv) Step(act common.ActionEnum) (state common.State, reward fl
 	p.state[2] = theta
 	p.state[3] = thetaDot
 
-	state = p.state
-	done = (x < -p.xRange) ||
+	res = &Result{}
+	res.State = p.state
+	res.Done = (x < -p.xRange) ||
 		(x > p.xRange) ||
 		(theta < -p.thetaRange) ||
 		(theta > p.thetaRange)
 
-	if !done {
+	if !res.Done {
 		p.info.Add("step", 1)
-		reward = 1.0
+		res.Reward = 1.0
 	} else {
-		reward = 0.0
+		res.Reward = 0.0
 	}
-	info = p.info
-	return
+	res.Info = p.info
+	return res
 }
 func (p *CartPoleEnv) Reset() common.State {
 	p.state = []float64{
@@ -143,6 +144,9 @@ func (p *CartPoleEnv) Reset() common.State {
 	}
 	p.info.Set("step", 0)
 	return p.state
+}
+func (p *CartPoleEnv) Set(state common.State) {
+	p.state = state
 }
 func (p *CartPoleEnv) Close() {
 }

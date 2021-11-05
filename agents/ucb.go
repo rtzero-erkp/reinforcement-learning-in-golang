@@ -8,11 +8,12 @@ import (
 var _ Agent = &UCB{}
 
 type UCB struct {
-	model   common.Tree // 模型
+	model common.Tree // 模型
+	mesh  []float64
 }
 
-func (p *UCB) Policy(state []int, space common.Space) common.Policy {
-	var node = p.model.Find(state)
+func (p *UCB) Policy(state common.State, space common.Space) common.Policy {
+	var node = p.model.Find(state.Encode(p.mesh))
 	countSum := node.Accum().Count()
 	if countSum == 0 {
 		node.Policy().Clean()
@@ -45,14 +46,15 @@ func (p *UCB) Policy(state []int, space common.Space) common.Policy {
 	}
 	return node.Policy()
 }
-func (p *UCB) Reward(state []int, act common.ActionEnum, reward float64) {
-	var node = p.model.Find(state)
+func (p *UCB) Reward(state common.State, act common.ActionEnum, reward float64) {
+	var node = p.model.Find(state.Encode(p.mesh))
 	node.Accum().Add(act, reward)
 }
 
-func NewUCB() Agent {
+func NewUCB(mesh []float64) Agent {
 	var p = &UCB{
-		model:   common.NewRootNode(),
+		model: common.NewRootNode(),
+		mesh:  mesh,
 	}
 	return p
 }

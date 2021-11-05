@@ -5,6 +5,6 @@ import (
 )
 
 type Agent interface {
-	Policy(state []int, space common.Space) (policy common.Policy)
-	Reward(state []int, act common.ActionEnum, reward float64)
+	Policy(state common.State, space common.Space) (policy common.Policy)
+	Reward(state common.State, act common.ActionEnum, reward float64)
 }
