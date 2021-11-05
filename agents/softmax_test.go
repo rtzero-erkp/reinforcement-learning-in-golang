@@ -7,8 +7,8 @@ import (
 	"testing"
 )
 
-func TestEpsilonGreed0(t *testing.T) {
-	Convey("TestEpsilonGreed0", t, func() {
+func TestSoftMax0(t *testing.T) {
+	Convey("TestSoftMax0", t, func() {
 		var (
 			policy common.Policy
 			space  common.Space
@@ -21,7 +21,7 @@ func TestEpsilonGreed0(t *testing.T) {
 		state = env.Reset()
 		space = env.ActionSpace()
 		rewardCum = common.NewReward1D(env.ActionSpace())
-		var agent = NewEpsilonGreed(space, 0.5)
+		var agent = NewSoftMax(space, 0.5)
 		for count := 0; count < 100; count++ {
 			policy = agent.Policy(space)
 			act = policy.Sample()

@@ -17,31 +17,21 @@ type BanditsEnv struct {
 	state           common.Stater
 	stepsBeyondDone int // step计数
 	// 工具类
-	space *common.Space // 可选行动
-	rand  *rand.Rand    // 随机数生成器
+	space common.Space // 可选行动
+	rand  *rand.Rand   // 随机数生成器
 }
 
-func NewBanditsEnv() Env {
-	var banditsNum = 5
+func NewBanditsEnv(banditsNum int) Env {
 	return &BanditsEnv{
 		banditsNum:      banditsNum,
 		state:           common.NewState(),
 		stepsBeyondDone: 0,
-		space:           common.NewActionsByNum(banditsNum),
-		rand:            rand.New(rand.NewSource(time.Now().Unix())),
-	}
-}
-func NewBanditsEnvByNum(banditsNum int) Env {
-	return &BanditsEnv{
-		banditsNum:      banditsNum,
-		state:           common.NewState(),
-		stepsBeyondDone: 0,
-		space:           common.NewActionsByNum(banditsNum),
+		space:           common.NewSpace1DByNum(banditsNum),
 		rand:            rand.New(rand.NewSource(time.Now().Unix())),
 	}
 }
 
-func (p *BanditsEnv) ActionSpace() *common.Space {
+func (p *BanditsEnv) ActionSpace() common.Space {
 	return p.space
 }
 func (p *BanditsEnv) String() string {

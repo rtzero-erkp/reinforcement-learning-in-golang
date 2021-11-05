@@ -4,12 +4,10 @@ import (
 	"fmt"
 )
 
-type GameEnum string
 type ActionEnum int
 
 const (
-	GameEnum_CartPole_v0 GameEnum = "CartPoleV0"
-	GameEnum_Bandits_v0  GameEnum = "BanditsV0"
+	ActionEnum_Unknown ActionEnum = -1
 
 	ActionEnum_Up    ActionEnum = 20100
 	ActionEnum_Down  ActionEnum = 20101

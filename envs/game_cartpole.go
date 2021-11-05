@@ -28,8 +28,8 @@ type CartPoleEnv struct {
 	state           common.Stater
 	stepsBeyondDone int // step计数
 	// 工具类
-	space *common.Space // 可选行动
-	rand  *rand.Rand    // 随机数生成器
+	space common.Space // 可选行动
+	rand  *rand.Rand   // 随机数生成器
 }
 
 func NewCartPoleEnv() Env {
@@ -51,7 +51,7 @@ func NewCartPoleEnv() Env {
 		xThreshold:            2.4,
 		state:                 common.NewState(),
 		stepsBeyondDone:       0,
-		space: common.NewActions(
+		space: common.NewSpace1DByEnum(
 			common.ActionEnum_Left,
 			common.ActionEnum_Right,
 		),
@@ -60,7 +60,7 @@ func NewCartPoleEnv() Env {
 
 }
 
-func (p *CartPoleEnv) ActionSpace() *common.Space {
+func (p *CartPoleEnv) ActionSpace() common.Space {
 	return p.space
 }
 func (p *CartPoleEnv) String() string {
