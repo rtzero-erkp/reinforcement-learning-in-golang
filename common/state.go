@@ -1,4 +1,4 @@
-package envs
+package common
 
 type Stater interface {
 	GetFloat64(key string) float64

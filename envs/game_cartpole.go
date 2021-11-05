@@ -2,6 +2,7 @@ package envs
 
 import (
 	"fmt"
+	"gameServer/common"
 	"log"
 	"math"
 	"math/rand"
@@ -24,39 +25,44 @@ type CartPoleEnv struct {
 	thetaThresholdRadians float64
 	xThreshold            float64
 	// 当前状态
-	state           Stater
+	state           common.Stater
 	stepsBeyondDone int // step计数
 	// 工具类
-	actionSpace AuctionSpacer // 可选行动
-	rand        *rand.Rand    // 随机数生成器
+	space *common.Space // 可选行动
+	rand  *rand.Rand    // 随机数生成器
 }
 
 func NewCartPoleEnv() Env {
-	var self = &CartPoleEnv{}
-	self.gravity = 9.8                             // 重力
-	self.massCart = 1.0                            // 头部质量
-	self.massPole = 0.1                            // 杆部质量
-	self.totalMass = self.massPole + self.massCart // 质量
-	self.length = 0.5                              // 杆的半长
-	self.poleMassLength = self.massPole * self.length
-	self.forceMag = 10.0                // 推力
-	self.tau = 0.02                     // seconds between state updates
-	self.kinematicsIntegrator = "euler" // 运动学积分器
-	self.thetaThresholdRadians = 12 * 2 * math.Pi / 360
-	self.xThreshold = 2.4
+	var massCart = 1.0 // 头部质量
+	var massPole = 0.1 // 杆部质量
+	var length = 0.5   // 杆的半长
 
-	self.state = NewState()
-	self.stepsBeyondDone = 0
+	return &CartPoleEnv{
+		gravity:               9.8,                 // 重力
+		massCart:              massCart,            // 头部质量
+		massPole:              massPole,            // 杆部质量
+		totalMass:             massPole + massCart, // 质量
+		length:                0.5,                 // 杆的半长
+		poleMassLength:        massPole * length,
+		forceMag:              10.0,    // 推力
+		tau:                   0.02,    // seconds between state updates
+		kinematicsIntegrator:  "euler", // 运动学积分器
+		thetaThresholdRadians: 12 * 2 * math.Pi / 360,
+		xThreshold:            2.4,
+		state:                 common.NewState(),
+		stepsBeyondDone:       0,
+		space: common.NewActions(
+			common.ActionEnum_Left,
+			common.ActionEnum_Right,
+		),
+		rand: rand.New(rand.NewSource(time.Now().Unix())),
+	}
 
-	self.actionSpace = NewActions(ActionEnum_Left, ActionEnum_Right)
-	self.rand = rand.New(rand.NewSource(time.Now().Unix()))
-	return self
 }
 
-func (p *CartPoleEnv) ActionSpace() AuctionSpacer {
-	return p.actionSpace
+func (p *CartPoleEnv) ActionSpace() *common.Space {
+	return p.space
 }
-
 func (p *CartPoleEnv) String() string {
 	var x = p.state.GetFloat64("x")
 	var xDot = p.state.GetFloat64("xDot")
@@ -64,23 +70,21 @@ func (p *CartPoleEnv) String() string {
 	var thetaDot = p.state.GetFloat64("thetaDot")
 	return fmt.Sprintf("x:%v, xDot:%v, theta:%v, thetaDot:%v", x, xDot, theta, thetaDot)
 }
-
 func (p *CartPoleEnv) Seed(seed int64) rand.Source {
 	var source = rand.NewSource(seed)
 	p.rand = rand.New(source)
 	return source
 }
-
-func (p *CartPoleEnv) Step(act ActionEnum) (state Stater, reward float64, done bool) {
-	if !p.actionSpace.Contain(act) {
+func (p *CartPoleEnv) Step(act common.ActionEnum) (state common.Stater, reward float64, done bool) {
+	if !p.space.Contain(act) {
 		log.Fatal(fmt.Sprintf("actions space not contain act:%v", act))
 	}
 
 	var force float64
 	switch act {
-	case ActionEnum_Left:
+	case common.ActionEnum_Left:
 		force = p.forceMag
-	case ActionEnum_Right:
+	case common.ActionEnum_Right:
 		force = -p.forceMag
 	}
 
@@ -130,8 +134,7 @@ func (p *CartPoleEnv) Step(act ActionEnum) (state Stater, reward float64, done b
 
 	return
 }
-
-func (p *CartPoleEnv) reset() Stater {
+func (p *CartPoleEnv) Reset() common.Stater {
 	p.state.SetFloat64("x", p.rand.Float64()*0.1-0.05)
 	p.state.SetFloat64("xDot", p.rand.Float64()*0.1-0.05)
 	p.state.SetFloat64("theta", p.rand.Float64()*0.1-0.05)
@@ -139,6 +142,5 @@ func (p *CartPoleEnv) reset() Stater {
 	p.stepsBeyondDone = 0
 	return p.state
 }
-
 func (p *CartPoleEnv) Close() {
 }
