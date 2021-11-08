@@ -2,14 +2,24 @@ package common
 
 import "math/rand"
 
-var _ Space = &Space1D{}
+var _ Space = &SpaceVec{}
 
-type Space1D struct {
+type SpaceVec struct {
 	acts []ActionEnum
 }
 
+func (p *SpaceVec) Clone() Space {
+	var cp = &SpaceVec{
+		acts: []ActionEnum{},
+	}
+	for _, act := range p.acts {
+		cp.acts = append(cp.acts, act)
+	}
+	return cp
+}
+
 func NewSpace1DByEnum(acts ...ActionEnum) Space {
-	var p = &Space1D{
+	var p = &SpaceVec{
 		acts: []ActionEnum{},
 	}
 	for _, act := range acts {
@@ -18,7 +28,7 @@ func NewSpace1DByEnum(acts ...ActionEnum) Space {
 	return p
 }
 func NewSpace1DByNum(num int) Space {
-	var p = &Space1D{
+	var p = &SpaceVec{
 		acts: []ActionEnum{},
 	}
 	for i := 0; i < num; i++ {
@@ -27,7 +37,7 @@ func NewSpace1DByNum(num int) Space {
 	return p
 }
 
-func (p *Space1D) Contain(act ActionEnum) bool {
+func (p *SpaceVec) Contain(act ActionEnum) bool {
 	for _, actI := range p.acts {
 		if actI == act {
 			return true
@@ -35,10 +45,10 @@ func (p *Space1D) Contain(act ActionEnum) bool {
 	}
 	return false
 }
-func (p *Space1D) Acts() []ActionEnum {
+func (p *SpaceVec) Acts() []ActionEnum {
 	return p.acts
 }
-func (p *Space1D) Sample() ActionEnum {
+func (p *SpaceVec) Sample() ActionEnum {
 	var idx = rand.Intn(len(p.acts))
 	return p.acts[idx]
 }

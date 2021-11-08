@@ -9,11 +9,14 @@ import (
 var _ Agent = &SoftMax{}
 
 type SoftMax struct {
-	tau   float64     // 概率
-	model common.Tree // 模型
+	tau   float64      // 概率
+	model common.Model // 模型
 	mesh  []float64
 }
 
+func (p *SoftMax) String() string {
+	return "SoftMax"
+}
 func (p *SoftMax) Policy(state common.State, space common.Space) common.Policy {
 	var node = p.model.Find(state.Encode(p.mesh))
 	var probSum float64 = 0

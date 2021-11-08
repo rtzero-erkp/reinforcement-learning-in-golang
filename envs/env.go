@@ -19,5 +19,6 @@ type Env interface {
 	Step(act common.ActionEnum) (res *Result) // 执行一步
 	Reset() common.State                      // 重置游戏
 	Close()                                   // 关闭游戏
+	Clone() Env                               // 复制游戏
 	Set(state common.State)                   // 设置为目标状态
 }

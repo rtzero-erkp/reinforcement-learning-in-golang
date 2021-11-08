@@ -8,11 +8,14 @@ import (
 var _ Agent = &EpsilonGreed{}
 
 type EpsilonGreed struct {
-	epsilon float64     // 概率
-	model   common.Tree // 模型
+	epsilon float64      // 概率
+	model   common.Model // 模型
 	mesh    []float64
 }
 
+func (p *EpsilonGreed) String() string {
+	return "EpsilonGreed"
+}
 func (p *EpsilonGreed) Policy(state common.State, space common.Space) common.Policy {
 	var node = p.model.Find(state.Encode(p.mesh))
 	var rate = rand.Float64()

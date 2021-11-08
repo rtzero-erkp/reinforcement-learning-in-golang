@@ -31,6 +31,27 @@ type CartPoleEnv struct {
 	rand  *rand.Rand   // 随机数生成器
 }
 
+func (p *CartPoleEnv) Clone() Env {
+	var cp = &CartPoleEnv{
+		gravity:              p.gravity,
+		massCart:             p.massCart,
+		massPole:             p.massPole,
+		totalMass:            p.totalMass,
+		length:               p.length,
+		poleMassLength:       p.poleMassLength,
+		forceMag:             p.forceMag,
+		tau:                  p.tau,
+		kinematicsIntegrator: p.kinematicsIntegrator,
+		thetaRange:           p.thetaRange,
+		xRange:               p.xRange,
+		state:                p.state.Clone(),
+		info:                 p.info.Clone(),
+		space:                p.space.Clone(),
+		rand:                 rand.New(rand.NewSource(rand.Int63())),
+	}
+	return cp
+}
+
 func NewCartPoleEnv(xRange float64, thetaRange float64) Env {
 	var massCart = 1.0 // 头部质量
 	var massPole = 0.1 // 杆部质量

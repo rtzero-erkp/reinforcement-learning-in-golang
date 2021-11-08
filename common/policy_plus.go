@@ -1,6 +1,7 @@
 package common
 
 import (
+	"fmt"
 	"math/rand"
 )
 
@@ -43,4 +44,11 @@ func (p *PolicyPlus) Clean() {
 	for key := range *p {
 		delete(*p, key)
 	}
+}
+func (p *PolicyPlus) String() string {
+	var line = ""
+	for k, v := range *p {
+		line += fmt.Sprintf("[policy] %v:%f\n", k, v)
+	}
+	return line
 }

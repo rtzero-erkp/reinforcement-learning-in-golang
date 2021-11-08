@@ -1,6 +1,8 @@
 package common
 
-import "fmt"
+import (
+	"fmt"
+)
 
 var _ Accumulate = &Accum{}
 
@@ -36,11 +38,18 @@ func (p *Accum) String() string {
 		rewardSum += reward
 		countSum += count
 	}
+	var meanSum float64
+	if countSum == 0 {
+		meanSum = 0
+	} else {
+		meanSum = rewardSum / countSum
+	}
 	line += fmt.Sprintf("[accum] best, Act:%v mean:%10.7f\n", actMax, meanMax)
-	line += fmt.Sprintf("[accum] total, Reward:%10.7f, count:%10.0f, mean:%10.7f\n", rewardSum, countSum, rewardSum/countSum)
+	line += fmt.Sprintf("[accum] total, Reward:%10.7f, count:%10.0f, mean:%10.7f\n", rewardSum, countSum, meanSum)
 	return line
 }
 func (p *Accum) Mean(act ActionEnum) float64 {
+	//log.Printf("count:%v, reward:%v", p.countCum[act], p.rewardCum[act])
 	if p.countCum[act] == 0 {
 		return 0
 	} else {

@@ -30,6 +30,17 @@ func NewBanditsEnv(banditsNum int) Env {
 	}
 }
 
+func (p *BanditsEnv) Clone() Env {
+	var cp = &BanditsEnv{
+		banditsNum: p.banditsNum,
+		state:      p.state.Clone(),
+		info:       p.info.Clone(),
+		space:      p.space.Clone(),
+		rand:       rand.New(rand.NewSource(rand.Int63())),
+	}
+
+	return cp
+}
 func (p *BanditsEnv) ActionSpace() common.Space {
 	return p.space
 }
@@ -54,11 +65,12 @@ func (p *BanditsEnv) Step(act common.ActionEnum) (res *Result) {
 
 	var key = fmt.Sprintf("ex%v", int(act))
 	var val = p.info.Get(key)
-
+	//var reward = p.rand.Float64() * val * 2
+	var reward = val
 	return &Result{
 		State:  p.state,
-		Reward: p.rand.Float64() * val * 2,
-		Done:   false,
+		Reward: reward,
+		Done:   true,
 		Info:   p.info,
 	}
 }

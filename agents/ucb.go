@@ -8,12 +8,16 @@ import (
 var _ Agent = &UCB{}
 
 type UCB struct {
-	model common.Tree // 模型
+	model common.Model // 模型
 	mesh  []float64
 }
 
+func (p *UCB) String() string {
+	return "UCB"
+}
 func (p *UCB) Policy(state common.State, space common.Space) common.Policy {
 	var node = p.model.Find(state.Encode(p.mesh))
+	//log.Printf("[accum] state:%v, Accum:%v", state.Encode(p.mesh), node.Accum())
 	countSum := node.Accum().Count()
 	if countSum == 0 {
 		node.Policy().Clean()

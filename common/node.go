@@ -1,12 +1,12 @@
 package common
 
-type Tree interface {
-	Find(state []int) Tree
+type Model interface {
+	Find(state []int) Model
 	Accum() Accumulate
 	Policy() Policy
 }
 
-var _ Tree = &Node{}
+var _ Model = &Node{}
 
 type Node struct {
 	accum  Accumulate    // 累计收益
@@ -20,7 +20,7 @@ func (p *Node) Accum() Accumulate {
 func (p *Node) Policy() Policy {
 	return p.policy
 }
-func (p *Node) Find(state []int) Tree {
+func (p *Node) Find(state []int) Model {
 	var (
 		node = p
 		next *Node
