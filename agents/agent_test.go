@@ -41,8 +41,7 @@ func TestAgent0(t *testing.T) {
 			space = env.ActionSpace()
 			accum = common.NewAccum()
 			for count := 0; count < simulate; count++ {
-				policy := agent.Policy(state, space)
-				act := policy.Sample()
+				act := agent.Policy(state, space)
 				res = env.Step(act)
 				agent.Reward(state, act, res.Reward)
 				accum.Add(act, res.Reward)
@@ -85,7 +84,7 @@ func TestAgent1(t *testing.T) {
 			state = env.Reset()
 			space = env.ActionSpace()
 			for !res.Done {
-				act := agent.Policy(state, space).Sample()
+				act := agent.Policy(state, space)
 				res = env.Step(act)
 				state = res.State
 			}
@@ -114,7 +113,6 @@ func TestAgent2(t *testing.T) {
 		}
 
 		state  common.State
-		policy common.Policy
 		act    common.ActionEnum
 		res    *envs.Result
 		mem    = common.NewMem()
@@ -133,8 +131,7 @@ func TestAgent2(t *testing.T) {
 				mem.Clear()
 				// simulate
 				for !res.Done {
-					policy = agent.Policy(state, space)
-					act = policy.Sample()
+					act = agent.Policy(state, space)
 					res = env.Step(act)
 					mem.Add(state, act, res.Reward)
 					state = res.State

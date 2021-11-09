@@ -8,60 +8,84 @@ import (
 var _ Agent = &MCTS{}
 
 type MCTS struct {
-	env   envs.Env
-	model common.Model
-	mcNum int
+	env      envs.Env
+	mcNum    int
+	mesh     *common.Mesh
+	method   common.SearchMethod
+	arg      []interface{}
+	model    *common.HashMap
+	memPath  *common.MemPath
+	pathHead string
 }
 
+func (p *MCTS) Reset() {
+	p.model.Clear()
+	p.memPath.Clear()
+	p.pathHead = ""
+}
 func (p *MCTS) String() string {
-	return "MCTS"
+	return "MCTS:" + p.method.String()
 }
-func (p *MCTS) Policy(state common.State, space common.Space) common.Policy {
-	var accum = common.NewAccum()
+func (p *MCTS) Policy(state common.State, space common.Space) common.ActionEnum {
 	var res *envs.Result
+	var mem *common.Memory2
 
-	for i := 0; i < p.mcNum; i++ {
+	for i0 := 0; i0 < p.mcNum; i0++ {
+		// reset
+		p.memPath.Clear()
 		var envCrt = p.env.Clone()
-		var target = space.Sample()
-
-		var act = target
-		res = envCrt.Step(act)
-		var reward = res.Reward
+		var path = p.pathHead
+		// find leaf point
+		for {
+			var node = p.model.Find2(path)
+			var spaceCrt = p.env.ActionSpace()
+			var act = node.Accum.Sample(spaceCrt, p.method, p.arg...)
+			res = envCrt.Step(act)
+			p.memPath.Add(path, act, res.Reward)
+			path += act.String() + " "
+			if !res.Done {
+				break
+			}
+			if node.Accum.CountAct(act) == 0 {
+				break
+			}
+		}
+		// rand act to end
+		var reward float64 = 0
 		for !res.Done {
-			act = envCrt.ActionSpace().Sample()
+			var spaceCrt = p.env.ActionSpace()
+			var act = spaceCrt.Sample()
 			res = envCrt.Step(act)
 			reward += res.Reward
 		}
-		accum.Add(target, reward)
-	}
-
-	var actsMax []common.ActionEnum
-	var valMax float64
-	for _, act := range space.Acts() {
-		val := accum.Mean(act)
-		if (len(actsMax) == 0) || (val > valMax) {
-			actsMax = []common.ActionEnum{act}
-			valMax = val
-		} else
-		if val == valMax {
-			actsMax = append(actsMax, act)
+		// update
+		var memories = p.memPath.Get()
+		var memoriesLen = len(memories)
+		for i1 := 0; i1 < memoriesLen; i1++ {
+			mem = memories[memoriesLen-1-i1]
+			var node = p.model.Find2(mem.Path)
+			node.Accum.Add(mem.Act, reward)
+			reward = node.Accum.Mean()
 		}
 	}
 
-	var policy = common.NewPolicyPlus()
-	for _, act := range actsMax {
-		policy.Set(act, 1)
-	}
-
-	return policy
+	var node = p.model.Find2(p.pathHead)
+	var act = node.Accum.Sample(space, common.SearchMethodEnum_MeanQ)
+	p.pathHead += act.String() + " "
+	return act
 }
 func (p *MCTS) Reward(state common.State, act common.ActionEnum, reward float64) {}
 
-func NewMCTS(env envs.Env, mcNum int) Agent {
+func NewMCTS(env envs.Env, mcNum int, mesh *common.Mesh, method common.SearchMethod, arg ...interface{}) Agent {
 	var p = &MCTS{
-		env:   env,
-		model: common.NewTree(),
-		mcNum: mcNum,
+		env:      env,
+		mcNum:    mcNum,
+		mesh:     mesh,
+		method:   method,
+		arg:      arg,
+		model:    common.NewHashMap(),
+		memPath:  common.NewMemPath(),
+		pathHead: "",
 	}
 	return p
 }

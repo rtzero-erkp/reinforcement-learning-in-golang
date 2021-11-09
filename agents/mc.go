@@ -12,10 +12,11 @@ type MC struct {
 	mcNum int
 }
 
+func (p *MC) Reset() {}
 func (p *MC) String() string {
 	return "MC"
 }
-func (p *MC) Policy(state common.State, space common.Space) common.Policy {
+func (p *MC) Policy(state common.State, space common.Space) common.ActionEnum {
 	var accum = common.NewAccum()
 	var res *envs.Result
 
@@ -34,25 +35,7 @@ func (p *MC) Policy(state common.State, space common.Space) common.Policy {
 		accum.Add(target, reward)
 	}
 
-	var actsMax []common.ActionEnum
-	var valMax float64
-	for _, act := range space.Acts() {
-		val := accum.Mean(act)
-		if (len(actsMax) == 0) || (val > valMax) {
-			actsMax = []common.ActionEnum{act}
-			valMax = val
-		} else
-		if val == valMax {
-			actsMax = append(actsMax, act)
-		}
-	}
-
-	var policy = common.NewPolicyPlus()
-	for _, act := range actsMax {
-		policy.Set(act, 1)
-	}
-
-	return policy
+	return accum.Sample(space, common.SearchMethodEnum_MeanQ)
 }
 func (p *MC) Reward(state common.State, act common.ActionEnum, reward float64) {}
 

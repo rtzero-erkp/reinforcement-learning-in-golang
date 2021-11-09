@@ -18,14 +18,14 @@ const (
 func (p ActionEnum) String() string {
 	switch p {
 	case ActionEnum_Up:
-		return "[Act] Up"
+		return "U"
 	case ActionEnum_Down:
-		return "[Act] Down"
+		return "D"
 	case ActionEnum_Right:
-		return "[Act] Right"
+		return "R"
 	case ActionEnum_Left:
-		return "[Act] Left"
+		return "L"
 	default:
-		return fmt.Sprintf("[Act] %v", int(p))
+		return fmt.Sprintf("%v", int(p))
 	}
 }

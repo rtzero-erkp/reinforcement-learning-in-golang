@@ -2,53 +2,23 @@ package agents
 
 import (
 	"gameServer/common"
-	"math"
 )
 
 var _ Agent = &UCB{}
 
 type UCB struct {
-	model common.Model // 模型
+	model *common.HashMap // 模型
 	mesh  *common.Mesh
 }
 
+func (p *UCB) Reset() {}
 func (p *UCB) String() string {
 	return "UCB"
 }
-func (p *UCB) Policy(state common.State, space common.Space) common.Policy {
+func (p *UCB) Policy(state common.State, space common.Space) common.ActionEnum {
 	var node = p.model.Find(state, p.mesh)
-	//log.Printf("[accum] state:%v, Accum:%v", state.Hash(p.mesh), node.Accum)
-	countSum := node.Accum.Count()
-	if countSum == 0 {
-		node.Policy.Clean()
-		node.Policy.Set(space.Sample(), 1)
-		return node.Policy
-	}
-	var actsMax []common.ActionEnum
-	var ucbMax float64
-	for _, act := range space.Acts() {
-		count := node.Accum.CountAct(act)
-		if count == 0 {
-			node.Policy.Clean()
-			node.Policy.Set(act, 1)
-			return node.Policy
-		}
-		upperBound := math.Sqrt((2 * math.Log(countSum)) / count)
-		q := node.Accum.Mean(act)
-		ucb := upperBound + q
-		if (len(actsMax) == 0) || ucb > ucbMax {
-			ucbMax = ucb
-			actsMax = []common.ActionEnum{act}
-		} else
-		if ucb == ucbMax {
-			actsMax = append(actsMax, act)
-		}
-	}
-	node.Policy.Clean()
-	for _, act := range actsMax {
-		node.Policy.Set(act, 1)
-	}
-	return node.Policy
+	var act = node.Accum.Sample(space, common.SearchMethodEnum_UCB)
+	return act
 }
 func (p *UCB) Reward(state common.State, act common.ActionEnum, reward float64) {
 	var node = p.model.Find(state, p.mesh)
@@ -57,7 +27,7 @@ func (p *UCB) Reward(state common.State, act common.ActionEnum, reward float64) 
 
 func NewUCB(mesh *common.Mesh) Agent {
 	var p = &UCB{
-		model: common.NewTree(),
+		model: common.NewHashMap(),
 		mesh:  mesh,
 	}
 	return p

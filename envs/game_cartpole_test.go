@@ -19,7 +19,7 @@ func TestCartPole0(t *testing.T) {
 		for !res.Done {
 			var act = env.ActionSpace().Sample()
 			res = env.Step(act)
-			t.Log(res.State)
+			//t.Log(res.State)
 			accum.Add(act, reward)
 		}
 		env.Close()
