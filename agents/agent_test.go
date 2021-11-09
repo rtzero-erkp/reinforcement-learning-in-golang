@@ -26,6 +26,7 @@ func TestAgent0(t *testing.T) {
 			NewSoftMax(tau, mesh),
 			NewUCB(mesh),
 			NewMC(env, mcNum),
+			NewDT(env, 0.1, 0.5, mesh, common.SearchMethodEnum_UCB),
 		}
 
 		space common.Space
@@ -37,6 +38,7 @@ func TestAgent0(t *testing.T) {
 	for _, agent := range agents {
 		Convey(fmt.Sprintf("TestAgent0:%v", agent), t, func() {
 			t.Logf("TestAgent0:%v", agent)
+			agent.Reset()
 			state = env.Reset()
 			space = env.ActionSpace()
 			accum = common.NewAccum()
@@ -71,6 +73,7 @@ func TestAgent1(t *testing.T) {
 			NewSoftMax(tau, mesh),
 			NewUCB(mesh),
 			NewMC(env, mcNum),
+			NewDT(env, 0.1, 0.5, mesh, common.SearchMethodEnum_UCB),
 		}
 
 		space common.Space
@@ -81,6 +84,7 @@ func TestAgent1(t *testing.T) {
 	for _, agent := range agents {
 		Convey(fmt.Sprintf("TestAgent1:%v", agent), t, func() {
 			t.Logf("TestAgent1:%v", agent)
+			agent.Reset()
 			state = env.Reset()
 			space = env.ActionSpace()
 			for !res.Done {
@@ -110,6 +114,7 @@ func TestAgent2(t *testing.T) {
 			NewEpsilonGreed(epsilon, mesh),
 			NewSoftMax(tau, mesh),
 			NewUCB(mesh),
+			NewDT(env, 0.1, 0.5, mesh, common.SearchMethodEnum_UCB),
 		}
 
 		state  common.State
@@ -123,6 +128,7 @@ func TestAgent2(t *testing.T) {
 	for _, agent := range agents {
 		Convey(fmt.Sprintf("TestAgent1:%v", agent), t, func() {
 			t.Logf("TestAgent1:%v", agent)
+			agent.Reset()
 			record = make([]float64, split)
 			for i0 := 0; i0 < simulate; i0++ {
 				// reset

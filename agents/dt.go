@@ -3,44 +3,37 @@ package agents
 import (
 	"gameServer/common"
 	"gameServer/envs"
-	"log"
-	"math/rand"
 )
 
 var _ Agent = &DT{}
 
 type DT struct {
-	model  *common.ValueMap // 模型
+	model  *common.HashValue // 模型
 	mesh   *common.Mesh
+	accum  common.Accumulate
 	env    envs.Env
 	alpha  float64
 	lambda float64
+	args   []interface{}
+	method common.SearchMethod
 }
 
-func (p *DT) Reset() {}
+func (p *DT) Reset() {
+	p.model.Clear()
+}
 func (p *DT) String() string {
-	return "DT"
+	return "DT:" + p.method.String()
 }
 func (p *DT) Policy(state common.State, space common.Space) common.ActionEnum {
-	var valueMax float64
-	var actsMax []common.ActionEnum
+	p.accum.Reset()
 	for _, act := range space.Acts() {
 		var cp = p.env.Clone()
 		cp.Set(state)
 		var stateCrt = cp.Step(act).State
 		var nodeCrt = p.model.Find(stateCrt, p.mesh)
-		if (len(actsMax) == 0) || (nodeCrt.Value > valueMax) {
-			actsMax = []common.ActionEnum{act}
-		} else
-		if nodeCrt.Value == valueMax {
-			actsMax = append(actsMax, act)
-		}
+		p.accum.Add(act, nodeCrt.Value)
 	}
-	if len(actsMax) == 0 {
-		log.Fatalln("space is nil")
-	}
-	var idx = rand.Intn(len(actsMax))
-	return actsMax[idx]
+	return p.accum.Sample(space, p.method, p.args...)
 }
 func (p *DT) Reward(state common.State, act common.ActionEnum, reward float64) {
 	var cp = p.env.Clone()
@@ -51,17 +44,19 @@ func (p *DT) Reward(state common.State, act common.ActionEnum, reward float64) {
 	var vs = node.Value
 	var vsDot = nodeDot.Value
 	// v(s) = v(s) + alpha * (r + lambda * (v(s') - v(s)))
-	vs = vs + p.alpha*(reward+p.lambda*(vsDot-vs))
-	node.Value = vs
+	node.Value = vs + p.alpha*(reward+p.lambda*(vsDot-vs))
 }
 
-func NewDT(env envs.Env, alpha float64, lambda float64, mesh *common.Mesh) Agent {
+func NewDT(env envs.Env, alpha float64, lambda float64, mesh *common.Mesh, method common.SearchMethod, args ...interface{}) Agent {
 	var p = &DT{
 		alpha:  alpha,  // 0.1
 		lambda: lambda, // 0.5
 		env:    env,
-		model:  common.NewValueMap(),
+		model:  common.NewHashValue(),
 		mesh:   mesh,
+		accum:  common.NewAccum(),
+		method: method,
+		args:   args,
 	}
 	return p
 }

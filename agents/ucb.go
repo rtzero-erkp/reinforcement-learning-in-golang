@@ -7,7 +7,7 @@ import (
 var _ Agent = &UCB{}
 
 type UCB struct {
-	model *common.HashMap // 模型
+	model *common.HashPolicy // 模型
 	mesh  *common.Mesh
 }
 
@@ -27,7 +27,7 @@ func (p *UCB) Reward(state common.State, act common.ActionEnum, reward float64) 
 
 func NewUCB(mesh *common.Mesh) Agent {
 	var p = &UCB{
-		model: common.NewHashMap(),
+		model: common.NewHashPolicy(),
 		mesh:  mesh,
 	}
 	return p

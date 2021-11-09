@@ -7,8 +7,8 @@ import (
 var _ Agent = &SoftMax{}
 
 type SoftMax struct {
-	tau   float64      // 概率
-	model *common.HashMap // 模型
+	tau   float64            // 概率
+	model *common.HashPolicy // 模型
 	mesh  *common.Mesh
 }
 
@@ -29,7 +29,7 @@ func (p *SoftMax) Reward(state common.State, act common.ActionEnum, reward float
 func NewSoftMax(tau float64, mesh *common.Mesh) Agent {
 	var p = &SoftMax{
 		tau:   tau,
-		model: common.NewHashMap(),
+		model: common.NewHashPolicy(),
 		mesh:  mesh,
 	}
 	return p

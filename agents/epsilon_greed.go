@@ -7,8 +7,8 @@ import (
 var _ Agent = &EpsilonGreed{}
 
 type EpsilonGreed struct {
-	epsilon float64      // 概率
-	model   *common.HashMap // 模型
+	epsilon float64            // 概率
+	model   *common.HashPolicy // 模型
 	mesh    *common.Mesh
 }
 
@@ -29,7 +29,7 @@ func (p *EpsilonGreed) Reward(state common.State, act common.ActionEnum, reward 
 func NewEpsilonGreed(epsilon float64, mesh *common.Mesh) Agent {
 	var p = &EpsilonGreed{
 		epsilon: epsilon,
-		model:   common.NewHashMap(),
+		model:   common.NewHashPolicy(),
 		mesh:    mesh,
 	}
 	return p

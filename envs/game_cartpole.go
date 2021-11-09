@@ -158,6 +158,7 @@ func (p *CartPoleEnv) Step(act common.ActionEnum) (res *Result) {
 }
 func (p *CartPoleEnv) Reset() common.State {
 	p.state = []float64{
+		//0, 0, 0, 0,
 		p.rand.Float64()*0.1 - 0.05,
 		p.rand.Float64()*0.1 - 0.05,
 		p.rand.Float64()*0.1 - 0.05,

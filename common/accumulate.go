@@ -37,6 +37,7 @@ func (m SearchMethod) String() string {
 }
 
 type Accumulate interface {
+	Reset()
 	CountAct(act ActionEnum) float64
 	Count() float64
 	Mean() float64
@@ -53,6 +54,13 @@ type Accum struct {
 	countCum  map[ActionEnum]float64
 	reward    float64
 	count     float64
+}
+
+func (p *Accum) Reset() {
+	p.rewardCum = map[ActionEnum]float64{}
+	p.countCum = map[ActionEnum]float64{}
+	p.count = 0
+	p.reward = 0
 }
 
 func (p *Accum) CountAct(act ActionEnum) float64 {

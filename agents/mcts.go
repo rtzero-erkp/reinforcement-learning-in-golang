@@ -10,10 +10,9 @@ var _ Agent = &MCTS{}
 type MCTS struct {
 	env      envs.Env
 	mcNum    int
-	mesh     *common.Mesh
 	method   common.SearchMethod
 	arg      []interface{}
-	model    *common.HashMap
+	model    *common.HashPolicy
 	memPath  *common.MemPath
 	pathHead string
 }
@@ -76,14 +75,13 @@ func (p *MCTS) Policy(state common.State, space common.Space) common.ActionEnum 
 }
 func (p *MCTS) Reward(state common.State, act common.ActionEnum, reward float64) {}
 
-func NewMCTS(env envs.Env, mcNum int, mesh *common.Mesh, method common.SearchMethod, arg ...interface{}) Agent {
+func NewMCTS(env envs.Env, mcNum int, method common.SearchMethod, arg ...interface{}) Agent {
 	var p = &MCTS{
 		env:      env,
 		mcNum:    mcNum,
-		mesh:     mesh,
 		method:   method,
 		arg:      arg,
-		model:    common.NewHashMap(),
+		model:    common.NewHashPolicy(),
 		memPath:  common.NewMemPath(),
 		pathHead: "",
 	}

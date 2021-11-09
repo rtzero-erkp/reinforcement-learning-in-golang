@@ -11,20 +11,23 @@ import (
 
 func TestMc0(t *testing.T) {
 	var (
-		mcNum = 100
-
+		mcNum      = 100
 		banditsNum = 5
-		mesh       = common.NewMesh(1)
 
 		env    = envs.NewBanditsEnv(banditsNum)
 		agents = []Agent{
 			NewMC(env, mcNum),
-			NewMCTS(env, mcNum, mesh, common.SearchMethodEnum_Random),
+			NewMCTS(env, mcNum, common.SearchMethodEnum_Random),
+			NewMCTS(env, mcNum, common.SearchMethodEnum_MeanQ),
+			NewMCTS(env, mcNum, common.SearchMethodEnum_UCB),
+			NewMCTS(env, mcNum, common.SearchMethodEnum_EpsilonGreed, 0.5),
+			NewMCTS(env, mcNum, common.SearchMethodEnum_SoftMax, 0.5),
 		}
 	)
 	for _, agent := range agents {
 		Convey(fmt.Sprintf("TestMc0:%v", agent), t, func() {
 			t.Logf("TestMc0:%v", agent)
+			agent.Reset()
 			state := env.Reset()
 			space := env.ActionSpace()
 			act := agent.Policy(state, space)
@@ -39,22 +42,20 @@ func TestMc0(t *testing.T) {
 
 func TestMc1(t *testing.T) {
 	var (
-		mcNum = 100
-
+		mcNum      = 100
 		xRange     = 2.4
 		thetaRange = 12.0
 		simulate   = 3
 		stepLimit  = 3000
-		mesh       = common.NewMesh(50/xRange, 20, 50/thetaRange, 20)
 
 		env    = envs.NewCartPoleEnv(xRange, thetaRange)
 		agents = []Agent{
 			NewMC(env, mcNum),
-			NewMCTS(env, mcNum, mesh, common.SearchMethodEnum_Random),
-			NewMCTS(env, mcNum, mesh, common.SearchMethodEnum_MeanQ),
-			NewMCTS(env, mcNum, mesh, common.SearchMethodEnum_UCB),
-			NewMCTS(env, mcNum, mesh, common.SearchMethodEnum_EpsilonGreed, 0.5),
-			NewMCTS(env, mcNum, mesh, common.SearchMethodEnum_SoftMax, 0.5),
+			NewMCTS(env, mcNum, common.SearchMethodEnum_Random),
+			NewMCTS(env, mcNum, common.SearchMethodEnum_MeanQ),
+			NewMCTS(env, mcNum, common.SearchMethodEnum_UCB),
+			NewMCTS(env, mcNum, common.SearchMethodEnum_EpsilonGreed, 0.5),
+			NewMCTS(env, mcNum, common.SearchMethodEnum_SoftMax, 0.5),
 		}
 
 		state common.State
