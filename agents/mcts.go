@@ -2,13 +2,12 @@ package agents
 
 import (
 	"gameServer/common"
-	"gameServer/envs"
 )
 
-var _ Agent = &MCTS{}
+var _ common.Agent = &MCTS{}
 
 type MCTS struct {
-	env      envs.Env
+	env      common.Env
 	mcNum    int
 	method   common.SearchMethod
 	arg      []interface{}
@@ -25,8 +24,8 @@ func (p *MCTS) Reset() {
 func (p *MCTS) String() string {
 	return "MCTS:" + p.method.String()
 }
-func (p *MCTS) Policy(state common.State, space common.Space) common.ActionEnum {
-	var res *envs.Result
+func (p *MCTS) Policy(state common.Info, space common.Space) common.ActionEnum {
+	var res *common.Result
 	var mem *common.Memory2
 
 	for i0 := 0; i0 < p.mcNum; i0++ {
@@ -40,7 +39,7 @@ func (p *MCTS) Policy(state common.State, space common.Space) common.ActionEnum 
 			var spaceCrt = p.env.ActionSpace()
 			var act = node.Accum.Sample(spaceCrt, p.method, p.arg...)
 			res = envCrt.Step(act)
-			p.memPath.Add(path, act, res.Reward)
+			p.memPath.Add(path, act, res.Reward[0])
 			path += act.String() + " "
 			if !res.Done {
 				break
@@ -55,7 +54,7 @@ func (p *MCTS) Policy(state common.State, space common.Space) common.ActionEnum 
 			var spaceCrt = p.env.ActionSpace()
 			var act = spaceCrt.Sample()
 			res = envCrt.Step(act)
-			reward += res.Reward
+			reward += res.Reward[0]
 		}
 		// update
 		var memories = p.memPath.Get()
@@ -73,9 +72,9 @@ func (p *MCTS) Policy(state common.State, space common.Space) common.ActionEnum 
 	p.pathHead += act.String() + " "
 	return act
 }
-func (p *MCTS) Reward(state common.State, act common.ActionEnum, reward float64) {}
+func (p *MCTS) Reward(state common.Info, act common.ActionEnum, reward float64) {}
 
-func NewMCTS(env envs.Env, mcNum int, method common.SearchMethod, arg ...interface{}) Agent {
+func NewMCTS(env common.Env, mcNum int, method common.SearchMethod, arg ...interface{}) common.Agent {
 	var p = &MCTS{
 		env:      env,
 		mcNum:    mcNum,

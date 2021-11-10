@@ -17,9 +17,9 @@ const (
 	SearchMethodEnum_UCB          SearchMethod = 0
 )
 
-func (m SearchMethod) String() string {
+func (p SearchMethod) String() string {
 	var line string
-	switch m {
+	switch p {
 	case SearchMethodEnum_Random:
 		line = "Random"
 	case SearchMethodEnum_MeanQ:
@@ -47,32 +47,31 @@ type Accumulate interface {
 	String() string
 }
 
-var _ Accumulate = &Accum{}
+var _ Accumulate = &accum{}
 
-type Accum struct {
+type accum struct {
 	rewardCum map[ActionEnum]float64
 	countCum  map[ActionEnum]float64
 	reward    float64
 	count     float64
 }
 
-func (p *Accum) Reset() {
+func (p *accum) Reset() {
 	p.rewardCum = map[ActionEnum]float64{}
 	p.countCum = map[ActionEnum]float64{}
 	p.count = 0
 	p.reward = 0
 }
-
-func (p *Accum) CountAct(act ActionEnum) float64 {
+func (p *accum) CountAct(act ActionEnum) float64 {
 	return p.countCum[act]
 }
-func (p *Accum) Count() float64 {
+func (p *accum) Count() float64 {
 	return p.count
 }
-func (p *Accum) Mean() float64 {
+func (p *accum) Mean() float64 {
 	return p.reward / p.count
 }
-func (p *Accum) MeanAct(act ActionEnum) float64 {
+func (p *accum) MeanAct(act ActionEnum) float64 {
 	//log.Printf("count:%v, reward:%v", p.countCum[act], p.rewardCum[act])
 	if p.countCum[act] == 0 {
 		return 0
@@ -80,13 +79,13 @@ func (p *Accum) MeanAct(act ActionEnum) float64 {
 		return p.rewardCum[act] / p.countCum[act]
 	}
 }
-func (p *Accum) Add(act ActionEnum, reward float64) {
+func (p *accum) Add(act ActionEnum, reward float64) {
 	p.rewardCum[act] += reward
 	p.countCum[act] += 1
 	p.reward += reward
 	p.count += 1
 }
-func (p *Accum) Sample(space Space, method SearchMethod, arg ...interface{}) ActionEnum {
+func (p *accum) Sample(space Space, method SearchMethod, arg ...interface{}) ActionEnum {
 	for _, act := range space.Acts() {
 		if p.countCum[act] == 0 {
 			return act
@@ -111,7 +110,7 @@ func (p *Accum) Sample(space Space, method SearchMethod, arg ...interface{}) Act
 
 	return act
 }
-func (p *Accum) String() string {
+func (p *accum) String() string {
 	var line = "\n"
 	var actMax []ActionEnum
 	var meanMax float64
@@ -143,7 +142,7 @@ func (p *Accum) String() string {
 }
 
 func NewAccum() Accumulate {
-	var p = &Accum{
+	var p = &accum{
 		rewardCum: map[ActionEnum]float64{},
 		countCum:  map[ActionEnum]float64{},
 		count:     0,
@@ -152,10 +151,10 @@ func NewAccum() Accumulate {
 	return p
 }
 
-func (p *Accum) SampleRandom(space Space) ActionEnum {
+func (p *accum) SampleRandom(space Space) ActionEnum {
 	return space.Sample()
 }
-func (p *Accum) SampleMeanQ(space Space) ActionEnum {
+func (p *accum) SampleMeanQ(space Space) ActionEnum {
 	var actsMax []ActionEnum
 	var valMax float64
 	for _, act := range space.Acts() {
@@ -174,7 +173,7 @@ func (p *Accum) SampleMeanQ(space Space) ActionEnum {
 	var idx = rand.Intn(len(actsMax))
 	return actsMax[idx]
 }
-func (p *Accum) SampleEpsilonGreed(space Space, epsilon float64) ActionEnum {
+func (p *accum) SampleEpsilonGreed(space Space, epsilon float64) ActionEnum {
 	var rate = rand.Float64()
 	if rate < epsilon {
 		return space.Sample()
@@ -199,7 +198,7 @@ func (p *Accum) SampleEpsilonGreed(space Space, epsilon float64) ActionEnum {
 		return actsMax[idx]
 	}
 }
-func (p *Accum) SampleSoftMax(space Space, tau float64) ActionEnum {
+func (p *accum) SampleSoftMax(space Space, tau float64) ActionEnum {
 	var probSum float64 = 0
 	for _, act := range space.Acts() {
 		var q = p.MeanAct(act)
@@ -230,7 +229,7 @@ func (p *Accum) SampleSoftMax(space Space, tau float64) ActionEnum {
 	var idx = rand.Intn(len(actsMax))
 	return actsMax[idx]
 }
-func (p *Accum) SampleUCB(space Space) ActionEnum {
+func (p *accum) SampleUCB(space Space) ActionEnum {
 	countSum := p.Count()
 	var actsMax []ActionEnum
 	var ucbMax float64

@@ -2,13 +2,12 @@ package agents
 
 import (
 	"gameServer/common"
-	"gameServer/envs"
 )
 
-var _ Agent = &MC{}
+var _ common.Agent = &MC{}
 
 type MC struct {
-	env   envs.Env
+	env   common.Env
 	mcNum int
 }
 
@@ -16,9 +15,9 @@ func (p *MC) Reset() {}
 func (p *MC) String() string {
 	return "MC"
 }
-func (p *MC) Policy(state common.State, space common.Space) common.ActionEnum {
+func (p *MC) Policy(state common.Info, space common.Space) common.ActionEnum {
 	var accum = common.NewAccum()
-	var res *envs.Result
+	var res *common.Result
 
 	for i := 0; i < p.mcNum; i++ {
 		var envCrt = p.env.Clone()
@@ -26,20 +25,20 @@ func (p *MC) Policy(state common.State, space common.Space) common.ActionEnum {
 
 		var act = target
 		res = envCrt.Step(act)
-		var reward = res.Reward
+		var reward = res.Reward[0]
 		for !res.Done {
 			act = envCrt.ActionSpace().Sample()
 			res = envCrt.Step(act)
-			reward += res.Reward
+			reward += res.Reward[0]
 		}
 		accum.Add(target, reward)
 	}
 
 	return accum.Sample(space, common.SearchMethodEnum_MeanQ)
 }
-func (p *MC) Reward(state common.State, act common.ActionEnum, reward float64) {}
+func (p *MC) Reward(state common.Info, act common.ActionEnum, reward float64) {}
 
-func NewMC(env envs.Env, mcNum int) Agent {
+func NewMC(env common.Env, mcNum int) common.Agent {
 	var p = &MC{
 		env:   env,
 		mcNum: mcNum,

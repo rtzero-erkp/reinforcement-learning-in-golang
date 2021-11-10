@@ -8,7 +8,7 @@ import (
 	"math/rand"
 )
 
-var _ Env = &CartPoleEnv{}
+var _ common.Env = &CartPoleEnv{}
 
 type CartPoleEnv struct {
 	// 常量参数
@@ -24,14 +24,13 @@ type CartPoleEnv struct {
 	thetaRange           float64
 	xRange               float64
 	// 当前状态
-	state common.State
+	state common.Info
 	// 工具类
 	info  common.Info
 	space common.Space // 可选行动
-	rand  *rand.Rand   // 随机数生成器
 }
 
-func (p *CartPoleEnv) Clone() Env {
+func (p *CartPoleEnv) Clone() common.Env {
 	var cp = &CartPoleEnv{
 		gravity:              p.gravity,
 		massCart:             p.massCart,
@@ -47,12 +46,11 @@ func (p *CartPoleEnv) Clone() Env {
 		state:                p.state.Clone(),
 		info:                 p.info.Clone(),
 		space:                p.space.Clone(),
-		rand:                 rand.New(rand.NewSource(rand.Int63())),
 	}
 	return cp
 }
 
-func NewCartPoleEnv(xRange float64, thetaRange float64) Env {
+func NewCartPoleEnv(xRange float64, thetaRange float64) common.Env {
 	var massCart = 1.0 // 头部质量
 	var massPole = 0.1 // 杆部质量
 	var length = 0.5   // 杆的半长
@@ -69,13 +67,12 @@ func NewCartPoleEnv(xRange float64, thetaRange float64) Env {
 		kinematicsIntegrator: "euler", // 运动学积分器
 		thetaRange:           thetaRange,
 		xRange:               xRange,
-		state:                make([]float64, 4),
+		state:                common.NewInfoMap(),
 		info:                 common.NewInfoMap(),
-		space: common.NewSpace1DByEnum(
+		space: common.NewSpaceVecByEnum(
 			common.ActionEnum_Left,
 			common.ActionEnum_Right,
 		),
-		rand: rand.New(rand.NewSource(rand.Int63())),
 	}
 
 }
@@ -84,18 +81,13 @@ func (p *CartPoleEnv) ActionSpace() common.Space {
 	return p.space
 }
 func (p *CartPoleEnv) String() string {
-	var x = p.state[0]
-	var xDot = p.state[1]
-	var theta = p.state[2]
-	var thetaDot = p.state[3]
-	return fmt.Sprintf("x:%v, xDot:%v, theta:%v, thetaDot:%v", x, xDot, theta, thetaDot)
+	var x = p.state.Get("x")
+	var xDot = p.state.Get("xDot")
+	var theta = p.state.Get("theta")
+	var thetaDot = p.state.Get("thetaDot")
+	return fmt.Sprintf("[CartPole] x:%v, xDot:%v, theta:%v, thetaDot:%v", x, xDot, theta, thetaDot)
 }
-func (p *CartPoleEnv) Seed(seed int64) rand.Source {
-	var source = rand.NewSource(seed)
-	p.rand = rand.New(source)
-	return source
-}
-func (p *CartPoleEnv) Step(act common.ActionEnum) (res *Result) {
+func (p *CartPoleEnv) Step(act common.ActionEnum) (res *common.Result) {
 	if !p.space.Contain(act) {
 		log.Fatal(fmt.Sprintf("actions space not contain act:%v", act))
 	}
@@ -108,10 +100,10 @@ func (p *CartPoleEnv) Step(act common.ActionEnum) (res *Result) {
 		force = -p.forceMag
 	}
 
-	var x = p.state[0]
-	var xDot = p.state[1]
-	var theta = p.state[2]
-	var thetaDot = p.state[3]
+	var x = p.state.Get("x")
+	var xDot = p.state.Get("xDot")
+	var theta = p.state.Get("theta")
+	var thetaDot = p.state.Get("thetaDot")
 
 	theta = theta * 2 * math.Pi / 360
 
@@ -135,12 +127,12 @@ func (p *CartPoleEnv) Step(act common.ActionEnum) (res *Result) {
 	}
 	theta = theta / 2 / math.Pi * 360
 
-	p.state[0] = x
-	p.state[1] = xDot
-	p.state[2] = theta
-	p.state[3] = thetaDot
+	p.state.Set("x", x)
+	p.state.Set("xDot", xDot)
+	p.state.Set("theta", theta)
+	p.state.Set("thetaDot", thetaDot)
 
-	res = &Result{}
+	res = &common.Result{}
 	res.State = p.state
 	res.Done = (x < -p.xRange) ||
 		(x > p.xRange) ||
@@ -149,26 +141,21 @@ func (p *CartPoleEnv) Step(act common.ActionEnum) (res *Result) {
 
 	if !res.Done {
 		p.info.Add("step", 1)
-		res.Reward = 1.0
+		res.Reward = []float64{1.0}
 	} else {
-		res.Reward = 0.0
+		res.Reward = []float64{0.0}
 	}
 	res.Info = p.info
 	return res
 }
-func (p *CartPoleEnv) Reset() common.State {
-	p.state = []float64{
-		//0, 0, 0, 0,
-		p.rand.Float64()*0.1 - 0.05,
-		p.rand.Float64()*0.1 - 0.05,
-		p.rand.Float64()*0.1 - 0.05,
-		p.rand.Float64()*0.1 - 0.05,
-	}
+func (p *CartPoleEnv) Reset() common.Info {
+	p.state.Set("x", rand.Float64()*0.1-0.05)
+	p.state.Set("xDot", rand.Float64()*0.1-0.05)
+	p.state.Set("theta", rand.Float64()*0.1-0.05)
+	p.state.Set("thetaDot", rand.Float64()*0.1-0.05)
 	p.info.Set("step", 0)
 	return p.state
 }
-func (p *CartPoleEnv) Set(state common.State) {
+func (p *CartPoleEnv) Set(state common.Info) {
 	p.state = state
-}
-func (p *CartPoleEnv) Close() {
 }

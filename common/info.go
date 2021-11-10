@@ -3,6 +3,7 @@ package common
 import "fmt"
 
 type Info interface {
+	Hash(mesh *Mesh) string
 	Get(key string) float64
 	Set(key string, val float64)
 	Add(key string, val float64)
@@ -11,12 +12,12 @@ type Info interface {
 	Clone() Info
 }
 
-var _ Info = &InfoMap{}
+var _ Info = &infoMap{}
 
-type InfoMap map[string]float64
+type infoMap map[string]float64
 
-func (p *InfoMap) Clone() Info {
-	var cp = &InfoMap{}
+func (p *infoMap) Clone() Info {
+	var cp = &infoMap{}
 	for k, v := range *p {
 		(*cp)[k] = v
 	}
@@ -24,24 +25,47 @@ func (p *InfoMap) Clone() Info {
 }
 
 func NewInfoMap() Info {
-	return &InfoMap{}
+	return &infoMap{}
 }
-func (p *InfoMap) Get(key string) float64 {
+func (p *infoMap) Get(key string) float64 {
 	return (*p)[key]
 }
-func (p *InfoMap) Keys() []string {
+func (p *infoMap) Keys() []string {
 	return (*p).Keys()
 }
-func (p *InfoMap) Set(key string, val float64) {
+func (p *infoMap) Set(key string, val float64) {
 	(*p)[key] = val
 }
-func (p *InfoMap) Add(key string, val float64) {
+func (p *infoMap) Add(key string, val float64) {
 	(*p)[key] += val
 }
-func (p *InfoMap) String() string {
+func (p *infoMap) String() string {
 	var line = "\n"
 	for k, v := range *p {
 		line += fmt.Sprintf("[infos] key:%v, val:%10.7f\n", k, v)
 	}
 	return line
+}
+func (p *infoMap) Hash(mesh *Mesh) string {
+	// switch type
+	var hash = ""
+	for i, key := range mesh.keys {
+		var v0 = mesh.vals[i]
+		var v1 = (*p)[key]
+		hash += fmt.Sprint(int(v0*v1)) + " "
+	}
+	return hash
+}
+
+type Mesh struct {
+	keys []string
+	vals []float64
+}
+
+func NewMesh(keys []string, vals []float64) *Mesh {
+	var o = &Mesh{
+		keys: keys,
+		vals: vals,
+	}
+	return o
 }

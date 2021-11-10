@@ -2,14 +2,8 @@ package common
 
 import "fmt"
 
-//type Memories interface {
-//	Add(state State, act ActionEnum, reward float64)
-//	Clear()
-//	Get() []*Memory
-//}
-
 type Memory struct {
-	State  State
+	Info   Info
 	Act    ActionEnum
 	Reward float64
 }
@@ -28,8 +22,8 @@ func NewMem() *Mem {
 		mem: []*Memory{},
 	}
 }
-func (p *Mem) Add(state State, act ActionEnum, reward float64) {
-	var mem = &Memory{State: state.Clone(), Act: act, Reward: reward}
+func (p *Mem) Add(state Info, act ActionEnum, reward float64) {
+	var mem = &Memory{Info: state.Clone(), Act: act, Reward: reward}
 	p.mem = append(p.mem, mem)
 }
 func (p *Mem) Clear() {
@@ -54,8 +48,8 @@ func NewMemoryCircle(mesh *Mesh) *MemoryCircle {
 		code:   []string{},
 	}
 }
-func (p *MemoryCircle) Add(state State, act ActionEnum, reward float64) {
-	var mem = &Memory{State: state.Clone(), Act: act, Reward: reward}
+func (p *MemoryCircle) Add(state Info, act ActionEnum, reward float64) {
+	var mem = &Memory{Info: state.Clone(), Act: act, Reward: reward}
 	var code = fmt.Sprintf("%v", state.Hash(p.mesh))
 	for i, codeI := range p.code {
 		if codeI == code {

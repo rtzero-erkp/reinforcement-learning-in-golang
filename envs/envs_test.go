@@ -6,10 +6,30 @@ import (
 	"testing"
 )
 
+func TestBandits0(t *testing.T) {
+	Convey("TestBandits0", t, func() {
+		var (
+			res    = &common.Result{}
+			reward float64
+			accum  common.Accumulate
+		)
+		var env = NewBanditsEnv(5)
+		env.Reset()
+		accum = common.NewAccum()
+		for count := 0; count < 10; count++ {
+			var act = env.ActionSpace().Sample()
+			res = env.Step(act)
+			accum.Add(act, reward)
+		}
+		t.Log(res.Info)
+		t.Log(accum)
+	})
+}
+
 func TestCartPole0(t *testing.T) {
 	Convey("TestCartPole0", t, func() {
 		var (
-			res    = &Result{}
+			res    = &common.Result{}
 			reward float64
 			accum  common.Accumulate
 		)
@@ -22,7 +42,6 @@ func TestCartPole0(t *testing.T) {
 			//t.Log(res.State)
 			accum.Add(act, reward)
 		}
-		env.Close()
 		t.Log(accum)
 	})
 }
