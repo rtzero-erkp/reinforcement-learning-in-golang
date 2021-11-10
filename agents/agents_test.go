@@ -36,7 +36,7 @@ func TestAgent0(t *testing.T) {
 	)
 	for _, agent := range agents {
 		Convey(fmt.Sprintf("TestAgent0:%v", agent), t, func() {
-			t.Logf("TestAgent0:%v", agent)
+			log.Printf("TestAgent0:%v", agent)
 			agent.Reset()
 			state = env.Reset()
 			space = env.ActionSpace()
@@ -48,8 +48,8 @@ func TestAgent0(t *testing.T) {
 				accum.Add(act, res.Reward[0])
 				state = res.State
 			}
-			t.Log(res.Info)
-			t.Log(accum)
+			log.Print(res.Info)
+			log.Print(accum)
 		})
 	}
 }
@@ -83,7 +83,7 @@ func TestAgent1(t *testing.T) {
 	)
 	for _, agent := range agents {
 		Convey(fmt.Sprintf("TestAgent1:%v", agent), t, func() {
-			t.Logf("TestAgent1:%v", agent)
+			log.Printf("TestAgent1:%v", agent)
 			agent.Reset()
 			state = env.Reset()
 			space = env.ActionSpace()
@@ -128,7 +128,7 @@ func TestAgent2(t *testing.T) {
 	)
 	for _, agent := range agents {
 		Convey(fmt.Sprintf("TestAgent2:%v", agent), t, func() {
-			t.Logf("TestAgent2:%v", agent)
+			log.Printf("TestAgent2:%v", agent)
 			agent.Reset()
 			record = make([]float64, split)
 			for i0 := 0; i0 < simulate; i0++ {
@@ -178,15 +178,15 @@ func TestAgent3(t *testing.T) {
 	)
 	for _, agent := range agents {
 		Convey(fmt.Sprintf("TestAgent3:%v", agent), t, func() {
-			t.Logf("TestAgent3:%v", agent)
+			log.Printf("TestAgent3:%v", agent)
 			agent.Reset()
 			state := env.Reset()
 			space := env.ActionSpace()
 			act := agent.Policy(state, space)
 			res := env.Step(act)
 			agent.Reward(state, act, res.Reward[0])
-			t.Log(act)
-			t.Log(res.Info)
+			log.Print(act)
+			log.Print(res.Info)
 		})
 	}
 }
@@ -215,7 +215,7 @@ func TestAgent4(t *testing.T) {
 	)
 	for _, agent := range agents {
 		Convey(fmt.Sprintf("TestAgent4:%v", agent), t, func() {
-			t.Logf("TestAgent4:%v", agent)
+			log.Printf("TestAgent4:%v", agent)
 			for i0 := 0; i0 < simulate; i0++ {
 				// reset
 				agent.Reset()
@@ -239,4 +239,35 @@ func TestAgent4(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestAgent5(t *testing.T) {
+	var (
+		P        = 1.0
+		simulate = 1
+
+		//mem   = common.NewMemPath()
+		env   = envs.NewAKQEnv(P)
+		agent = NewCFR()
+
+		state common.Info
+		res   *common.Result
+	)
+	Convey(fmt.Sprintf("TestAgent5:%v", agent), t, func() {
+		log.Printf("TestAgent5:%v", agent)
+		for i0 := 0; i0 < simulate; i0++ {
+			agent.Reset()
+			state = env.Reset()
+			for {
+				act := agent.Policy(state, env.ActionSpace())
+				res = env.Step(act)
+				state = res.State
+				if res.Done {
+					break
+				}
+			}
+			//agent.Reward(state, act, res.Reward[0])
+			log.Print(res)
+		}
+	})
 }

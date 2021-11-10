@@ -6,7 +6,7 @@ type Memory struct {
 	Reward float64
 }
 type Memory2 struct {
-	Path   string
+	Path   []ActionEnum
 	Act    ActionEnum
 	Reward float64
 }
@@ -86,7 +86,7 @@ func NewMemPath() *MemPath {
 		mem: []*Memory2{},
 	}
 }
-func (p *MemPath) Add(path string, act ActionEnum, reward float64) {
+func (p *MemPath) Add(path []ActionEnum, act ActionEnum, reward float64) {
 	var mem = &Memory2{Path: path, Act: act, Reward: reward}
 	p.mem = append(p.mem, mem)
 }

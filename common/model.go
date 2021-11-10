@@ -1,77 +1,105 @@
 package common
 
-type ModelPolicy interface {
-	Find(state Info, mesh Encoder) *NodePolicy
-	Find2(key string) *NodePolicy
-	Clear()
+import "log"
+
+type Node interface{}
+type NodePolicy struct {
+	Accum Accumulate
 }
-type ModelValue interface {
-	Find(state Info, mesh Encoder) *NodeValue
-	Clear()
-}
-type NodePolicy struct { //
-	Accum Accumulate // 累计收益
+type NodeQ struct {
+	Accum Accumulate
 }
 type NodeValue struct {
 	Value float64
-	State Info
+}
+type NodeCfr struct{}
+
+func NewNode(mode ModelType) Node {
+	var node Node
+	switch mode {
+	case ModelTypeEnum_Value:
+		node = &NodeValue{Value: 0}
+	case ModelTypeEnum_Policy:
+		node = &NodePolicy{Accum: NewAccum()}
+	case ModelTypeEnum_Q:
+		node = &NodeQ{Accum: NewAccum()}
+	case ModelTypeEnum_Cfr:
+		node = &NodeCfr{}
+	default:
+		log.Fatalf("unknown mode %v", mode)
+	}
+	return node
 }
 
-func NewNodePolicy() *NodePolicy {
-	return &NodePolicy{Accum: NewAccum()}
-}
-func NewNodeValue(state Info) *NodeValue {
-	return &NodeValue{State: state, Value: 0}
+type ModelMap struct {
+	mode  ModelType
+	nodes map[string]Node
 }
 
-type hashPolicy struct {
-	nodes map[string]*NodePolicy // 表结构
-}
-
-func NewHashPolicy() *hashPolicy {
-	return &hashPolicy{
-		nodes: map[string]*NodePolicy{}, // 表结构
+func NewModelMap(mode ModelType) *ModelMap {
+	return &ModelMap{
+		mode:  mode,
+		nodes: map[string]Node{},
 	}
 }
-func (p *hashPolicy) Find(state Info, encoder Encoder) *NodePolicy {
-	var code = encoder.Hash(state)
+func (p *ModelMap) Find(code string) Node {
 	var node, ok = p.nodes[code]
 	if !ok {
-		node = NewNodePolicy()
+		node = NewNode(p.mode)
 		p.nodes[code] = node
 	}
 	return node
 }
-func (p *hashPolicy) Find2(key string) *NodePolicy {
-	var node, ok = p.nodes[key]
-	if !ok {
-		node = NewNodePolicy()
-		p.nodes[key] = node
-	}
-	return node
-}
-func (p *hashPolicy) Clear() {
-	p.nodes = map[string]*NodePolicy{}
+func (p *ModelMap) Clear() {
+	p.nodes = map[string]Node{}
 }
 
-type hashValue struct {
-	nodes map[string]*NodeValue // 表结构
+type ModelTree struct {
+	mode  ModelType
+	node  Node
+	child map[ActionEnum]*ModelTree
 }
 
-func NewHashValue() *hashValue {
-	return &hashValue{
-		nodes: map[string]*NodeValue{}, // 表结构
+func NewModelTree(mode ModelType) *ModelTree {
+	return &ModelTree{
+		mode:  mode,
+		node:  NewNode(mode),
+		child: map[ActionEnum]*ModelTree{},
 	}
 }
-func (p *hashValue) Find(state Info, encoder Encoder) *NodeValue {
-	var code = encoder.Hash(state)
-	var node, ok = p.nodes[code]
-	if !ok {
-		node = NewNodeValue(state)
-		p.nodes[code] = node
+func (p *ModelTree) Find(history ...ActionEnum) Node {
+	var target = p
+	for _, act := range history {
+		var next, ok = target.child[act]
+		if !ok {
+			next = &ModelTree{
+				mode:  p.mode,
+				node:  NewNode(p.mode),
+				child: map[ActionEnum]*ModelTree{},
+			}
+			target.child[act] = next
+		}
+		target = next
 	}
-	return node
+	return target.node
 }
-func (p *hashValue) Clear() {
-	p.nodes = map[string]*NodeValue{}
+func (p *ModelTree) Move(history ...ActionEnum) *ModelTree {
+	var target = p
+	for _, act := range history {
+		var next, ok = target.child[act]
+		if !ok {
+			next = &ModelTree{
+				mode:  p.mode,
+				node:  NewNode(p.mode),
+				child: map[ActionEnum]*ModelTree{},
+			}
+			target.child[act] = next
+		}
+		target = next
+	}
+	return target
+}
+func (p *ModelTree) Clear() {
+	p.node = NewNode(p.mode)
+	p.child = map[ActionEnum]*ModelTree{}
 }

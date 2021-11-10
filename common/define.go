@@ -87,3 +87,12 @@ const (
 	SearchMethodEnum_SoftMax      SearchMethod = 1
 	SearchMethodEnum_UCB          SearchMethod = 0
 )
+
+type ModelType int
+
+const (
+	ModelTypeEnum_Value  ModelType = 3
+	ModelTypeEnum_Policy ModelType = 2
+	ModelTypeEnum_Q      ModelType = 1
+	ModelTypeEnum_Cfr    ModelType = 0
+)
