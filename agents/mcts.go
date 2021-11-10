@@ -11,7 +11,7 @@ type MCTS struct {
 	mcNum    int
 	method   common.SearchMethod
 	arg      []interface{}
-	model    *common.HashPolicy
+	model    common.ModelPolicy
 	memPath  *common.MemPath
 	pathHead string
 }

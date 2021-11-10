@@ -1,68 +1,77 @@
 package common
 
+type ModelPolicy interface {
+	Find(state Info, mesh Encoder) *NodePolicy
+	Find2(key string) *NodePolicy
+	Clear()
+}
+type ModelValue interface {
+	Find(state Info, mesh Encoder) *NodeValue
+	Clear()
+}
 type NodePolicy struct { //
 	Accum Accumulate // 累计收益
 }
-
-func NewNode() *NodePolicy {
-	return &NodePolicy{Accum: NewAccum()}
-}
-
-type HashPolicy struct {
-	nodes map[string]*NodePolicy // 表结构
-}
-
-func NewHashPolicy() *HashPolicy {
-	return &HashPolicy{
-		nodes: map[string]*NodePolicy{}, // 表结构
-	}
-}
-func (p *HashPolicy) Find(state Info, mesh *Mesh) *NodePolicy {
-	var node, ok = p.nodes[state.Hash(mesh)]
-	if !ok {
-		node = NewNode()
-		p.nodes[state.Hash(mesh)] = node
-	}
-	return node
-}
-func (p *HashPolicy) Find2(key string) *NodePolicy {
-	var node, ok = p.nodes[key]
-	if !ok {
-		node = NewNode()
-		p.nodes[key] = node
-	}
-	return node
-}
-func (p *HashPolicy) Clear() {
-	p.nodes = map[string]*NodePolicy{}
-}
-
 type NodeValue struct {
 	Value float64
 	State Info
 }
 
+func NewNodePolicy() *NodePolicy {
+	return &NodePolicy{Accum: NewAccum()}
+}
 func NewNodeValue(state Info) *NodeValue {
 	return &NodeValue{State: state, Value: 0}
 }
 
-type HashValue struct {
-	nodes map[string]*NodeValue // 表结构
+type hashPolicy struct {
+	nodes map[string]*NodePolicy // 表结构
 }
 
-func NewHashValue() *HashValue {
-	return &HashValue{
-		nodes: map[string]*NodeValue{}, // 表结构
+func NewHashPolicy() *hashPolicy {
+	return &hashPolicy{
+		nodes: map[string]*NodePolicy{}, // 表结构
 	}
 }
-func (p *HashValue) Find(state Info, mesh *Mesh) *NodeValue {
-	var node, ok = p.nodes[state.Hash(mesh)]
+func (p *hashPolicy) Find(state Info, encoder Encoder) *NodePolicy {
+	var code = encoder.Hash(state)
+	var node, ok = p.nodes[code]
 	if !ok {
-		node = NewNodeValue(state)
-		p.nodes[state.Hash(mesh)] = node
+		node = NewNodePolicy()
+		p.nodes[code] = node
 	}
 	return node
 }
-func (p *HashValue) Clear() {
+func (p *hashPolicy) Find2(key string) *NodePolicy {
+	var node, ok = p.nodes[key]
+	if !ok {
+		node = NewNodePolicy()
+		p.nodes[key] = node
+	}
+	return node
+}
+func (p *hashPolicy) Clear() {
+	p.nodes = map[string]*NodePolicy{}
+}
+
+type hashValue struct {
+	nodes map[string]*NodeValue // 表结构
+}
+
+func NewHashValue() *hashValue {
+	return &hashValue{
+		nodes: map[string]*NodeValue{}, // 表结构
+	}
+}
+func (p *hashValue) Find(state Info, encoder Encoder) *NodeValue {
+	var code = encoder.Hash(state)
+	var node, ok = p.nodes[code]
+	if !ok {
+		node = NewNodeValue(state)
+		p.nodes[code] = node
+	}
+	return node
+}
+func (p *hashValue) Clear() {
 	p.nodes = map[string]*NodeValue{}
 }

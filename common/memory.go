@@ -1,7 +1,5 @@
 package common
 
-import "fmt"
-
 type Memory struct {
 	Info   Info
 	Act    ActionEnum
@@ -34,23 +32,23 @@ func (p *Mem) Get() []*Memory {
 }
 
 type MemoryCircle struct {
-	mesh   *Mesh
-	code   []string
-	bench  []*Memory
-	circle []*Memory
+	encoder Encoder
+	code    []string
+	bench   []*Memory
+	circle  []*Memory
 }
 
-func NewMemoryCircle(mesh *Mesh) *MemoryCircle {
+func NewMemoryCircle(encoder Encoder) *MemoryCircle {
 	return &MemoryCircle{
-		bench:  []*Memory{},
-		circle: []*Memory{},
-		mesh:   mesh,
-		code:   []string{},
+		bench:   []*Memory{},
+		circle:  []*Memory{},
+		encoder: encoder,
+		code:    []string{},
 	}
 }
 func (p *MemoryCircle) Add(state Info, act ActionEnum, reward float64) {
 	var mem = &Memory{Info: state.Clone(), Act: act, Reward: reward}
-	var code = fmt.Sprintf("%v", state.Hash(p.mesh))
+	var code = p.encoder.Hash(state)
 	for i, codeI := range p.code {
 		if codeI == code {
 			p.circle = append(p.circle, p.bench[i:]...)

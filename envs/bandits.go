@@ -42,13 +42,7 @@ func (p *BanditsEnv) ActionSpace() common.Space {
 	return p.space
 }
 func (p *BanditsEnv) String() string {
-	var line = "[Bandits] "
-	for i := 0; i < p.banditsNum; i++ {
-		var key = fmt.Sprintf("ex%v", i)
-		var val = p.info.Get(key)
-		line += fmt.Sprintf("%v:%v ", key, val)
-	}
-	return line
+	return "Bandits"
 }
 func (p *BanditsEnv) Step(act common.ActionEnum) (res *common.Result) {
 	if !p.space.Contain(act) {
@@ -56,7 +50,7 @@ func (p *BanditsEnv) Step(act common.ActionEnum) (res *common.Result) {
 	}
 
 	var key = fmt.Sprintf("ex%v", act)
-	var val = p.info.Get(key)
+	var val = p.info.Get(key).(float64)
 	//var reward = p.rand.Float64() * val * 2
 	var reward = []float64{val}
 	return &common.Result{

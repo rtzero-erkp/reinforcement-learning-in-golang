@@ -1,47 +1,34 @@
 package envs
 
 import (
+	"fmt"
 	"gameServer/common"
 	. "github.com/smartystreets/goconvey/convey"
+	"log"
 	"testing"
 )
 
-func TestBandits0(t *testing.T) {
-	Convey("TestBandits0", t, func() {
-		var (
-			res    = &common.Result{}
-			reward float64
-			accum  common.Accumulate
-		)
-		var env = NewBanditsEnv(5)
-		env.Reset()
-		accum = common.NewAccum()
-		for count := 0; count < 10; count++ {
-			var act = env.ActionSpace().Sample()
-			res = env.Step(act)
-			accum.Add(act, reward)
+func TestEnvs0(t *testing.T) {
+	var (
+		res  *common.Result
+		envs = []common.Env{
+			NewBanditsEnv(5),
+			NewCartPoleEnv(2.4, 12),
+			NewAKQEnv(3),
 		}
-		t.Log(res.Info)
-		t.Log(accum)
-	})
-}
-
-func TestCartPole0(t *testing.T) {
-	Convey("TestCartPole0", t, func() {
-		var (
-			res    = &common.Result{}
-			reward float64
-			accum  common.Accumulate
-		)
-		var env = NewCartPoleEnv(2.4, 12)
-		env.Reset()
-		accum = common.NewAccum()
-		for !res.Done {
-			var act = env.ActionSpace().Sample()
-			res = env.Step(act)
-			//t.Log(res.State)
-			accum.Add(act, reward)
-		}
-		t.Log(accum)
-	})
+	)
+	for _, env := range envs {
+		Convey(fmt.Sprintf("TestEnvs0:%v", env), t, func() {
+			log.Printf("TestEnvs0:%v", env)
+			env.Reset()
+			for {
+				var act = env.ActionSpace().Sample()
+				res = env.Step(act)
+				if res.Done {
+					break
+				}
+			}
+			log.Println(res)
+		})
+	}
 }

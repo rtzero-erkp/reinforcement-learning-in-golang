@@ -4,59 +4,130 @@ import (
 	"fmt"
 	"gameServer/common"
 	"log"
+	"math/rand"
 )
 
-type Result struct {
-	State  common.Info
-	Reward float64
-	Done   bool
-	Info   common.Info
-}
+/* DESC:
+ *  3 card deck: Ace > King > Queen
+ *  2 Players, each player gets one card face+down
+ *  Higher card wins
+ *  Betting: (half+street game)
+ *    Ante: 1 chip
+ *    Player 1: bet P, or check
+ *    Player 2: call or fold
+ *  Stakes: scheduling signup order by chip count
+ *  -------------------------------------------------------
+ *  E(P0) |  P1  |   A  |   A  |   K  |   K  |   Q  |   Q
+ *  ------|------|------|------|------|------|------|------
+ *    P0  |      | Bet  | Fold | Bet  | Fold | Bet  | Fold
+ *  ------|------|------|------|------|------|------|------
+ *    A   | Call |      |      | -1-P |  -1  | -1-P |  -1
+ *    A   | Fold |      |      |  +1  |  +1  |  +1  |  +1
+ *    K   | Call | +1+P |  -1  |      |      | -1-P |  -1
+ *    K   | Fold |  +1  |  +1  |      |      |  +1  |  +1
+ *    Q   | Call | +1+P |  -1  | +1+P |  -1  |      |
+ *    Q   | Fold |  +1  |  +1  |  +1  |  +1  |      |
+ *  -------------------------------------------------------
+ */
+
 type AKQEnv struct {
 	state common.Info  // 玩家状态
 	info  common.Info  // 游戏信息
 	space common.Space // 行动空间
 }
 
-func NewAKQEnv() *AKQEnv {
-	return &AKQEnv{
+func NewAKQEnv(P float64) common.Env {
+	o := &AKQEnv{
 		state: common.NewInfoMap(),
 		info:  common.NewInfoMap(),
-		space: common.NewSpaceVecByEnum(common.ActionEnum_CardA, common.ActionEnum_CardK, common.ActionEnum_CardQ),
+		space: common.NewSpaceVecByEnum(),
 	}
+
+	o.info.Set("P", P)
+	return o
 }
 
-func (p *AKQEnv) Clone() *AKQEnv {
+func (p *AKQEnv) Clone() common.Env {
 	var cp = &AKQEnv{
-		state: common.NewInfoMap(),
-		info:  common.NewInfoMap(),
-		space: common.NewSpaceVecByEnum(common.ActionEnum_CardA, common.ActionEnum_CardK, common.ActionEnum_CardQ),
+		state: p.state.Clone(),
+		info:  p.info.Clone(),
+		space: p.space.Clone(),
 	}
 
 	return cp
+}
+func (p *AKQEnv) Reset() common.Info {
+	var dealt = []common.CardEnum{common.CardEnum_CardA, common.CardEnum_CardK, common.CardEnum_CardQ}
+	for i := 0; i < len(dealt); i++ {
+		var j = rand.Intn(len(dealt))
+		var tmp = dealt[i]
+		dealt[i] = dealt[j]
+		dealt[j] = tmp
+	}
+	p.state.Set(common.PlayerEnum_1, dealt[0])
+	p.state.Set(common.PlayerEnum_2, dealt[1])
+	p.state.Set("crt", common.PlayerEnum_1)
+	p.space.SetByEnum(common.ActionEnum_Bet, common.ActionEnum_Fold)
+	return p.state
 }
 func (p *AKQEnv) ActionSpace() common.Space {
 	return p.space
 }
 func (p *AKQEnv) String() string {
-	return fmt.Sprintf("[AKQ] %v", p.space)
+	return "AKQ"
 }
-func (p *AKQEnv) Step(act common.ActionEnum) (res *Result) {
+func (p *AKQEnv) Step(act common.ActionEnum) (res *common.Result) {
 	if !p.space.Contain(act) {
 		log.Fatal(fmt.Sprintf("actions space not contain act:%v", act))
 	}
 
-	var key = fmt.Sprintf("ex%v", act)
-	var val = p.info.Get(key)
-	//var reward = p.rand.Float64() * val * 2
-	var reward = val
-	return &Result{
-		State:  p.state,
-		Reward: reward,
-		Done:   true,
-		Info:   p.info,
+	var player = p.state.Get("crt").(string)
+	var P = p.info.Get("P").(float64)
+	var anti float64 = 1
+	p.state.Set(player+":act", act)
+
+	res = &common.Result{State: p.state, Info: p.info}
+	if player == common.PlayerEnum_1 {
+		if act == common.ActionEnum_Fold {
+			res.Done = true
+			res.Reward = []float64{-anti, +anti}
+			p.state.Set("crt", common.PlayerEnum_unknown)
+			return
+		} else
+		if act == common.ActionEnum_Bet {
+			p.space.SetByEnum(common.ActionEnum_Fold, common.ActionEnum_Call)
+			p.state.Set("crt", common.PlayerEnum_2)
+			res.Done = false
+			res.Reward = []float64{}
+			return
+		}
 	}
+	if player == common.PlayerEnum_2 {
+		if act == common.ActionEnum_Fold {
+			res.Done = true
+			res.Reward = []float64{+anti, -anti}
+			p.state.Set("crt", common.PlayerEnum_unknown)
+			return
+		} else
+		if act == common.ActionEnum_Call {
+			var dealt1 = p.state.Get(common.PlayerEnum_1).(common.CardEnum)
+			var dealt2 = p.state.Get(common.PlayerEnum_2).(common.CardEnum)
+			if dealt1.Big(dealt2) {
+				res.Reward = []float64{+anti + P, -anti - P}
+			} else
+			if dealt1.Same(dealt2) {
+				res.Reward = []float64{0, 0}
+			} else {
+				res.Reward = []float64{-anti - P, +anti + P}
+			}
+			res.Done = true
+			p.state.Set("crt", common.PlayerEnum_unknown)
+			return
+		}
+	}
+	log.Fatal("unknown error")
+	return
 }
-func (p *AKQEnv) Reset() common.Info {
-	return p.state
+func (p *AKQEnv) Set(state common.Info) {
+	p.state = state
 }

@@ -8,8 +8,8 @@ var _ common.Agent = &EpsilonGreed{}
 
 type EpsilonGreed struct {
 	epsilon float64            // 概率
-	model   *common.HashPolicy // 模型
-	mesh    *common.Mesh
+	model   common.ModelPolicy // 模型
+	mesh    common.Encoder
 }
 
 func (p *EpsilonGreed) Reset() {}
@@ -26,7 +26,7 @@ func (p *EpsilonGreed) Reward(state common.Info, act common.ActionEnum, reward f
 	node.Accum.Add(act, reward)
 }
 
-func NewEpsilonGreed(epsilon float64, mesh *common.Mesh) common.Agent {
+func NewEpsilonGreed(epsilon float64, mesh common.Encoder) common.Agent {
 	var p = &EpsilonGreed{
 		epsilon: epsilon,
 		model:   common.NewHashPolicy(),

@@ -7,8 +7,8 @@ import (
 var _ common.Agent = &UCB{}
 
 type UCB struct {
-	model *common.HashPolicy // 模型
-	mesh  *common.Mesh
+	model common.ModelPolicy // 模型
+	mesh  common.Encoder
 }
 
 func (p *UCB) Reset() {}
@@ -25,7 +25,7 @@ func (p *UCB) Reward(state common.Info, act common.ActionEnum, reward float64) {
 	node.Accum.Add(act, reward)
 }
 
-func NewUCB(mesh *common.Mesh) common.Agent {
+func NewUCB(mesh common.Encoder) common.Agent {
 	var p = &UCB{
 		model: common.NewHashPolicy(),
 		mesh:  mesh,

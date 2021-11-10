@@ -5,41 +5,6 @@ import (
 	"math/rand"
 )
 
-type ActionEnum string
-
-const (
-	ActionEnum_Unknown ActionEnum = "unknown"
-
-	ActionEnum_Up    ActionEnum = "Up"
-	ActionEnum_Down  ActionEnum = "Down"
-	ActionEnum_Right ActionEnum = "Right"
-	ActionEnum_Left  ActionEnum = "Left"
-
-	ActionEnum_Card2 ActionEnum = "Card2"
-	ActionEnum_Card3 ActionEnum = "Card3"
-	ActionEnum_Card4 ActionEnum = "Card4"
-	ActionEnum_Card5 ActionEnum = "Card5"
-	ActionEnum_Card6 ActionEnum = "Card6"
-	ActionEnum_Card7 ActionEnum = "Card7"
-	ActionEnum_Card8 ActionEnum = "Card8"
-	ActionEnum_Card9 ActionEnum = "Card9"
-	ActionEnum_CardT ActionEnum = "CardT"
-	ActionEnum_CardJ ActionEnum = "CardJ"
-	ActionEnum_CardQ ActionEnum = "CardQ"
-	ActionEnum_CardK ActionEnum = "CardK"
-	ActionEnum_CardA ActionEnum = "CardA"
-
-	ActionEnum_Fold  ActionEnum = "Fold"
-	ActionEnum_Check ActionEnum = "Check"
-	ActionEnum_Call  ActionEnum = "Call"
-	ActionEnum_Bet   ActionEnum = "Bet"
-	ActionEnum_AllIn ActionEnum = "AllIn"
-)
-
-func (p ActionEnum) String() string {
-	return string(p)
-}
-
 type Space interface {
 	Contain(act ActionEnum) bool
 	Acts() []ActionEnum
@@ -47,6 +12,8 @@ type Space interface {
 	Shuffle()
 	String() string
 	Clone() Space
+	SetByEnum(acts ...ActionEnum)
+	SetByNum(num int)
 }
 
 var _ Space = &spaceVec{}
@@ -113,4 +80,16 @@ func (p *spaceVec) Clone() Space {
 		cp.acts = append(cp.acts, act)
 	}
 	return cp
+}
+func (p *spaceVec) SetByEnum(acts ...ActionEnum) {
+	p.acts = []ActionEnum{}
+	for _, act := range acts {
+		p.acts = append(p.acts, act)
+	}
+}
+func (p *spaceVec) SetByNum(num int) {
+	p.acts = []ActionEnum{}
+	for i := 0; i < num; i++ {
+		p.acts = append(p.acts, ActionEnum(fmt.Sprint(i)))
+	}
 }

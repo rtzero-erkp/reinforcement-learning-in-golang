@@ -11,7 +11,6 @@ import (
 var _ common.Env = &CartPoleEnv{}
 
 type CartPoleEnv struct {
-	// 常量参数
 	gravity              float64 // 重力
 	massCart             float64 // 头部质量
 	massPole             float64 // 杆部质量
@@ -23,31 +22,9 @@ type CartPoleEnv struct {
 	kinematicsIntegrator string // 运动学积分器
 	thetaRange           float64
 	xRange               float64
-	// 当前状态
-	state common.Info
-	// 工具类
-	info  common.Info
-	space common.Space // 可选行动
-}
-
-func (p *CartPoleEnv) Clone() common.Env {
-	var cp = &CartPoleEnv{
-		gravity:              p.gravity,
-		massCart:             p.massCart,
-		massPole:             p.massPole,
-		totalMass:            p.totalMass,
-		length:               p.length,
-		poleMassLength:       p.poleMassLength,
-		forceMag:             p.forceMag,
-		tau:                  p.tau,
-		kinematicsIntegrator: p.kinematicsIntegrator,
-		thetaRange:           p.thetaRange,
-		xRange:               p.xRange,
-		state:                p.state.Clone(),
-		info:                 p.info.Clone(),
-		space:                p.space.Clone(),
-	}
-	return cp
+	state                common.Info
+	info                 common.Info
+	space                common.Space
 }
 
 func NewCartPoleEnv(xRange float64, thetaRange float64) common.Env {
@@ -77,15 +54,30 @@ func NewCartPoleEnv(xRange float64, thetaRange float64) common.Env {
 
 }
 
+func (p *CartPoleEnv) Clone() common.Env {
+	var cp = &CartPoleEnv{
+		gravity:              p.gravity,
+		massCart:             p.massCart,
+		massPole:             p.massPole,
+		totalMass:            p.totalMass,
+		length:               p.length,
+		poleMassLength:       p.poleMassLength,
+		forceMag:             p.forceMag,
+		tau:                  p.tau,
+		kinematicsIntegrator: p.kinematicsIntegrator,
+		thetaRange:           p.thetaRange,
+		xRange:               p.xRange,
+		state:                p.state.Clone(),
+		info:                 p.info.Clone(),
+		space:                p.space.Clone(),
+	}
+	return cp
+}
 func (p *CartPoleEnv) ActionSpace() common.Space {
 	return p.space
 }
 func (p *CartPoleEnv) String() string {
-	var x = p.state.Get("x")
-	var xDot = p.state.Get("xDot")
-	var theta = p.state.Get("theta")
-	var thetaDot = p.state.Get("thetaDot")
-	return fmt.Sprintf("[CartPole] x:%v, xDot:%v, theta:%v, thetaDot:%v", x, xDot, theta, thetaDot)
+	return "CartPole"
 }
 func (p *CartPoleEnv) Step(act common.ActionEnum) (res *common.Result) {
 	if !p.space.Contain(act) {
@@ -100,10 +92,10 @@ func (p *CartPoleEnv) Step(act common.ActionEnum) (res *common.Result) {
 		force = -p.forceMag
 	}
 
-	var x = p.state.Get("x")
-	var xDot = p.state.Get("xDot")
-	var theta = p.state.Get("theta")
-	var thetaDot = p.state.Get("thetaDot")
+	var x = p.state.Get("x").(float64)
+	var xDot = p.state.Get("xDot").(float64)
+	var theta = p.state.Get("theta").(float64)
+	var thetaDot = p.state.Get("thetaDot").(float64)
 
 	theta = theta * 2 * math.Pi / 360
 
@@ -140,7 +132,8 @@ func (p *CartPoleEnv) Step(act common.ActionEnum) (res *common.Result) {
 		(theta > p.thetaRange)
 
 	if !res.Done {
-		p.info.Add("step", 1)
+		var step = p.info.Get("step").(int)
+		p.info.Set("step", step+1)
 		res.Reward = []float64{1.0}
 	} else {
 		res.Reward = []float64{0.0}

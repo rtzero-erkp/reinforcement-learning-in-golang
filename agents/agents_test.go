@@ -13,12 +13,12 @@ func TestAgent0(t *testing.T) {
 	var (
 		tau     = 0.5
 		epsilon = 0.5
-		mcNum   = 100
+		mcNum   = 1
 
 		banditsNum = 5
-		simulate   = 100
+		simulate   = 1
 
-		mesh = common.NewMesh([]string{}, []float64{})
+		mesh = common.NewEncoder([]string{}, []float64{})
 		env  = envs.NewBanditsEnv(banditsNum)
 
 		agents = []common.Agent{
@@ -34,7 +34,6 @@ func TestAgent0(t *testing.T) {
 		accum common.Accumulate
 		res   = &common.Result{}
 	)
-
 	for _, agent := range agents {
 		Convey(fmt.Sprintf("TestAgent0:%v", agent), t, func() {
 			t.Logf("TestAgent0:%v", agent)
@@ -47,7 +46,7 @@ func TestAgent0(t *testing.T) {
 				res = env.Step(act)
 				agent.Reward(state, act, res.Reward[0])
 				accum.Add(act, res.Reward[0])
-				state = res.Info
+				state = res.State
 			}
 			t.Log(res.Info)
 			t.Log(accum)
@@ -59,12 +58,12 @@ func TestAgent1(t *testing.T) {
 	var (
 		tau     = 0.5
 		epsilon = 0.5
-		mcNum   = 100
+		mcNum   = 1
 
 		xRange     = 2.4
 		thetaRange = 12.0
 
-		mesh = common.NewMesh(
+		mesh = common.NewEncoder(
 			[]string{"x", "xDot", "theta", "thetaDot"},
 			[]float64{50 / xRange, 20, 50 / thetaRange, 20},
 		)
@@ -82,7 +81,6 @@ func TestAgent1(t *testing.T) {
 		state common.Info
 		res   = &common.Result{}
 	)
-
 	for _, agent := range agents {
 		Convey(fmt.Sprintf("TestAgent1:%v", agent), t, func() {
 			t.Logf("TestAgent1:%v", agent)
@@ -92,7 +90,7 @@ func TestAgent1(t *testing.T) {
 			for !res.Done {
 				act := agent.Policy(state, space)
 				res = env.Step(act)
-				state = res.Info
+				state = res.State
 			}
 		})
 	}
@@ -105,10 +103,10 @@ func TestAgent2(t *testing.T) {
 
 		xRange     = 2.4
 		thetaRange = 12.0
-		simulate   = 1000
-		split      = 10
+		simulate   = 1
+		split      = 1
 
-		mesh = common.NewMesh(
+		mesh = common.NewEncoder(
 			[]string{"x", "xDot", "theta", "thetaDot"},
 			[]float64{50 / xRange, 20, 50 / thetaRange, 20},
 		)
@@ -128,10 +126,9 @@ func TestAgent2(t *testing.T) {
 		space  = env.ActionSpace()
 		record []float64
 	)
-
 	for _, agent := range agents {
-		Convey(fmt.Sprintf("TestAgent1:%v", agent), t, func() {
-			t.Logf("TestAgent1:%v", agent)
+		Convey(fmt.Sprintf("TestAgent2:%v", agent), t, func() {
+			t.Logf("TestAgent2:%v", agent)
 			agent.Reset()
 			record = make([]float64, split)
 			for i0 := 0; i0 < simulate; i0++ {
@@ -144,7 +141,7 @@ func TestAgent2(t *testing.T) {
 					act = agent.Policy(state, space)
 					res = env.Step(act)
 					mem.Add(state, act, res.Reward[0])
-					state = res.Info
+					state = res.State
 				}
 				// train
 				steps := mem.Get()
@@ -166,7 +163,7 @@ func TestAgent2(t *testing.T) {
 
 func TestAgent3(t *testing.T) {
 	var (
-		mcNum      = 100
+		mcNum      = 1
 		banditsNum = 5
 
 		env    = envs.NewBanditsEnv(banditsNum)
@@ -196,11 +193,11 @@ func TestAgent3(t *testing.T) {
 
 func TestAgent4(t *testing.T) {
 	var (
-		mcNum      = 100
+		mcNum      = 1
 		xRange     = 2.4
 		thetaRange = 12.0
 		simulate   = 3
-		stepLimit  = 3000
+		stepLimit  = 10
 
 		env    = envs.NewCartPoleEnv(xRange, thetaRange)
 		agents = []common.Agent{
@@ -216,7 +213,6 @@ func TestAgent4(t *testing.T) {
 		act   common.ActionEnum
 		res   *common.Result
 	)
-
 	for _, agent := range agents {
 		Convey(fmt.Sprintf("TestAgent4:%v", agent), t, func() {
 			t.Logf("TestAgent4:%v", agent)
@@ -232,7 +228,7 @@ func TestAgent4(t *testing.T) {
 					act = agent.Policy(state, env.ActionSpace())
 					res = env.Step(act)
 					reward += res.Reward[0]
-					state = res.Info
+					state = res.State
 					step += 1
 					if step >= stepLimit {
 						log.Printf("step:%v >= stepLimit:%v, done", stepLimit, stepLimit)

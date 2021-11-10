@@ -7,16 +7,6 @@ import (
 	"math/rand"
 )
 
-type SearchMethod int
-
-const (
-	SearchMethodEnum_Random       SearchMethod = 4
-	SearchMethodEnum_MeanQ        SearchMethod = 3
-	SearchMethodEnum_EpsilonGreed SearchMethod = 2
-	SearchMethodEnum_SoftMax      SearchMethod = 1
-	SearchMethodEnum_UCB          SearchMethod = 0
-)
-
 func (p SearchMethod) String() string {
 	var line string
 	switch p {

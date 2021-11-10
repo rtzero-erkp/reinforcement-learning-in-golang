@@ -8,8 +8,8 @@ var _ common.Agent = &SoftMax{}
 
 type SoftMax struct {
 	tau   float64            // 概率
-	model *common.HashPolicy // 模型
-	mesh  *common.Mesh
+	model common.ModelPolicy // 模型
+	mesh  common.Encoder
 }
 
 func (p *SoftMax) Reset() {}
@@ -26,7 +26,7 @@ func (p *SoftMax) Reward(state common.Info, act common.ActionEnum, reward float6
 	node.Accum.Add(act, reward)
 }
 
-func NewSoftMax(tau float64, mesh *common.Mesh) common.Agent {
+func NewSoftMax(tau float64, mesh common.Encoder) common.Agent {
 	var p = &SoftMax{
 		tau:   tau,
 		model: common.NewHashPolicy(),
