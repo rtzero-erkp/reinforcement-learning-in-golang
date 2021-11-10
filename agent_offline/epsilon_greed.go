@@ -1,10 +1,10 @@
-package agents
+package agent_offline
 
 import (
 	"gameServer/common"
 )
 
-var _ common.Agent = &EpsilonGreed{}
+var _ common.AgentOnline = &EpsilonGreed{}
 
 type EpsilonGreed struct {
 	epsilon float64          // 概率
@@ -28,7 +28,7 @@ func (p *EpsilonGreed) Reward(state common.Info, act common.ActionEnum, reward f
 	node.Accum.Add(act, reward)
 }
 
-func NewEpsilonGreed(epsilon float64, mesh common.Encoder) common.Agent {
+func NewEpsilonGreed(epsilon float64, mesh common.Encoder) common.AgentOnline {
 	var p = &EpsilonGreed{
 		epsilon: epsilon,
 		model:   common.NewModelMap(common.ModelTypeEnum_Q),

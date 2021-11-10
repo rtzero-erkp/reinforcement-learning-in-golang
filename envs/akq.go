@@ -56,7 +56,7 @@ func (p *AKQEnv) Clone() common.Env {
 
 	return cp
 }
-func (p *AKQEnv) Reset() common.Info {
+func (p *AKQEnv) Reset() (common.Info, common.Info) {
 	var dealt = []common.CardEnum{common.CardEnum_CardA, common.CardEnum_CardK, common.CardEnum_CardQ}
 	for i := 0; i < len(dealt); i++ {
 		var j = rand.Intn(len(dealt))
@@ -68,9 +68,9 @@ func (p *AKQEnv) Reset() common.Info {
 	p.state.Set(common.PlayerEnum_2, dealt[1])
 	p.state.Set("crt", common.PlayerEnum_1)
 	p.space.SetByEnum(common.ActionEnum_Bet, common.ActionEnum_Fold)
-	return p.state
+	return p.state, p.info
 }
-func (p *AKQEnv) ActionSpace() common.Space {
+func (p *AKQEnv) Space() common.Space {
 	return p.space
 }
 func (p *AKQEnv) String() string {
@@ -130,4 +130,7 @@ func (p *AKQEnv) Step(act common.ActionEnum) (res *common.Result) {
 }
 func (p *AKQEnv) Set(state common.Info) {
 	p.state = state
+}
+func (p *AKQEnv) State() common.Info {
+	return p.state
 }

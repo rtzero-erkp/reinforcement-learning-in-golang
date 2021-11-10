@@ -1,10 +1,10 @@
-package agents
+package agent_offline
 
 import (
 	"gameServer/common"
 )
 
-var _ common.Agent = &DT{}
+var _ common.AgentOnline = &DT{}
 
 type DT struct {
 	model   *common.ModelMap // 模型
@@ -49,7 +49,7 @@ func (p *DT) Reward(state common.Info, act common.ActionEnum, reward float64) {
 	node.Value = vs + p.alpha*(reward+p.lambda*(vsDot-vs))
 }
 
-func NewDT(env common.Env, alpha float64, lambda float64, mesh common.Encoder, method common.SearchMethod, args ...interface{}) common.Agent {
+func NewDT(env common.Env, alpha float64, lambda float64, mesh common.Encoder, method common.SearchMethod, args ...interface{}) common.AgentOnline {
 	var p = &DT{
 		alpha:   alpha,  // 0.1
 		lambda:  lambda, // 0.5

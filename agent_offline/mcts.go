@@ -1,10 +1,10 @@
-package agents
+package agent_offline
 
 import (
 	"gameServer/common"
 )
 
-var _ common.Agent = &MCTS{}
+var _ common.AgentOnline = &MCTS{}
 
 type MCTS struct {
 	env    common.Env
@@ -33,7 +33,7 @@ func (p *MCTS) Policy(state common.Info, space common.Space) common.ActionEnum {
 		// find leaf point
 		for {
 			var node = p.model.Find(path...).(*common.NodeQ)
-			var spaceCrt = p.env.ActionSpace()
+			var spaceCrt = p.env.Space()
 			var act = node.Accum.Sample(spaceCrt, p.method, p.arg...)
 			res = envCrt.Step(act)
 			memPath.Add(path, act, res.Reward[0])
@@ -48,7 +48,7 @@ func (p *MCTS) Policy(state common.Info, space common.Space) common.ActionEnum {
 		// rand act to end
 		var reward float64 = 0
 		for !res.Done {
-			var spaceCrt = p.env.ActionSpace()
+			var spaceCrt = p.env.Space()
 			var act = spaceCrt.Sample()
 			res = envCrt.Step(act)
 			reward += res.Reward[0]
@@ -71,7 +71,7 @@ func (p *MCTS) Policy(state common.Info, space common.Space) common.ActionEnum {
 }
 func (p *MCTS) Reward(state common.Info, act common.ActionEnum, reward float64) {}
 
-func NewMCTS(env common.Env, mcNum int, method common.SearchMethod, arg ...interface{}) common.Agent {
+func NewMCTS(env common.Env, mcNum int, method common.SearchMethod, arg ...interface{}) common.AgentOnline {
 	var p = &MCTS{
 		env:    env,
 		mcNum:  mcNum,

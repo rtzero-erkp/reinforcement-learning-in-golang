@@ -1,10 +1,10 @@
-package agents
+package agent_offline
 
 import (
 	"gameServer/common"
 )
 
-var _ common.Agent = &SoftMax{}
+var _ common.AgentOnline = &SoftMax{}
 
 type SoftMax struct {
 	tau     float64          // 概率
@@ -28,7 +28,7 @@ func (p *SoftMax) Reward(state common.Info, act common.ActionEnum, reward float6
 	node.Accum.Add(act, reward)
 }
 
-func NewSoftMax(tau float64, mesh common.Encoder) common.Agent {
+func NewSoftMax(tau float64, mesh common.Encoder) common.AgentOnline {
 	var p = &SoftMax{
 		tau:     tau,
 		model:   common.NewModelMap(common.ModelTypeEnum_Q),

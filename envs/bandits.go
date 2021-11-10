@@ -38,7 +38,7 @@ func (p *BanditsEnv) Clone() common.Env {
 
 	return cp
 }
-func (p *BanditsEnv) ActionSpace() common.Space {
+func (p *BanditsEnv) Space() common.Space {
 	return p.space
 }
 func (p *BanditsEnv) String() string {
@@ -48,10 +48,7 @@ func (p *BanditsEnv) Step(act common.ActionEnum) (res *common.Result) {
 	if !p.space.Contain(act) {
 		log.Fatal(fmt.Sprintf("actions space not contain act:%v", act))
 	}
-
-	var key = fmt.Sprintf("ex%v", act)
-	var val = p.info.Get(key).(float64)
-	//var reward = p.rand.Float64() * val * 2
+	var val = p.info.Get(fmt.Sprintf("ex%v", act)).(float64)
 	var reward = []float64{val}
 	return &common.Result{
 		State:  p.state,
@@ -60,13 +57,15 @@ func (p *BanditsEnv) Step(act common.ActionEnum) (res *common.Result) {
 		Info:   p.info,
 	}
 }
-func (p *BanditsEnv) Reset() common.Info {
-	for i := 0; i < p.banditsNum; i++ {
-		var exI = rand.Float64()
-		p.info.Set(fmt.Sprintf("ex%v", i), exI)
+func (p *BanditsEnv) Reset() (common.Info, common.Info) {
+	for act := 0; act < p.banditsNum; act++ {
+		p.info.Set(fmt.Sprintf("ex%v", act), rand.Float64())
 	}
-	return p.state
+	return p.state, p.info
 }
 func (p *BanditsEnv) Set(state common.Info) {
 	p.state = state
+}
+func (p *BanditsEnv) State() common.Info {
+	return p.state
 }

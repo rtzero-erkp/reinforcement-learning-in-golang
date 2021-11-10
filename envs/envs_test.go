@@ -22,7 +22,7 @@ func TestEnvs0(t *testing.T) {
 			log.Printf("TestEnvs0:%v", env)
 			env.Reset()
 			for {
-				var act = env.ActionSpace().Sample()
+				var act = env.Space().Sample()
 				res = env.Step(act)
 				if res.Done {
 					break

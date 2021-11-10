@@ -1,10 +1,10 @@
-package agents
+package agent_offline
 
 import (
 	"gameServer/common"
 )
 
-var _ common.Agent = &MC{}
+var _ common.AgentOnline = &MC{}
 
 type MC struct {
 	env   common.Env
@@ -27,7 +27,7 @@ func (p *MC) Policy(state common.Info, space common.Space) common.ActionEnum {
 		res = envCrt.Step(act)
 		var reward = res.Reward[0]
 		for !res.Done {
-			act = envCrt.ActionSpace().Sample()
+			act = envCrt.Space().Sample()
 			res = envCrt.Step(act)
 			reward += res.Reward[0]
 		}
@@ -38,7 +38,7 @@ func (p *MC) Policy(state common.Info, space common.Space) common.ActionEnum {
 }
 func (p *MC) Reward(state common.Info, act common.ActionEnum, reward float64) {}
 
-func NewMC(env common.Env, mcNum int) common.Agent {
+func NewMC(env common.Env, mcNum int) common.AgentOnline {
 	var p = &MC{
 		env:   env,
 		mcNum: mcNum,

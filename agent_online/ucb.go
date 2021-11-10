@@ -1,10 +1,10 @@
-package agents
+package agent_offline
 
 import (
 	"gameServer/common"
 )
 
-var _ common.Agent = &UCB{}
+var _ common.AgentOnline = &UCB{}
 
 type UCB struct {
 	model   *common.ModelMap // 模型
@@ -27,7 +27,7 @@ func (p *UCB) Reward(state common.Info, act common.ActionEnum, reward float64) {
 	node.Accum.Add(act, reward)
 }
 
-func NewUCB(mesh common.Encoder) common.Agent {
+func NewUCB(mesh common.Encoder) common.AgentOnline {
 	var p = &UCB{
 		model:   common.NewModelMap(common.ModelTypeEnum_Q),
 		encoder: mesh,

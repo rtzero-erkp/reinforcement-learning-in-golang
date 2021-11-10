@@ -73,7 +73,7 @@ func (p *CartPoleEnv) Clone() common.Env {
 	}
 	return cp
 }
-func (p *CartPoleEnv) ActionSpace() common.Space {
+func (p *CartPoleEnv) Space() common.Space {
 	return p.space
 }
 func (p *CartPoleEnv) String() string {
@@ -141,14 +141,17 @@ func (p *CartPoleEnv) Step(act common.ActionEnum) (res *common.Result) {
 	res.Info = p.info
 	return res
 }
-func (p *CartPoleEnv) Reset() common.Info {
+func (p *CartPoleEnv) Reset() (common.Info, common.Info) {
 	p.state.Set("x", rand.Float64()*0.1-0.05)
 	p.state.Set("xDot", rand.Float64()*0.1-0.05)
 	p.state.Set("theta", rand.Float64()*0.1-0.05)
 	p.state.Set("thetaDot", rand.Float64()*0.1-0.05)
 	p.info.Set("step", 0)
-	return p.state
+	return p.state, p.info
 }
 func (p *CartPoleEnv) Set(state common.Info) {
 	p.state = state
+}
+func (p *CartPoleEnv) State() common.Info {
+	return p.state
 }
