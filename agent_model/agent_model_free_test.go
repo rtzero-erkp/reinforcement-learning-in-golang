@@ -17,7 +17,7 @@ func Test_model_free_0(t *testing.T) {
 		search_EpsilonGreed = common.NewSearchParam(common.SearchEnum_EpsilonGreed, 0.5)
 		search_SoftMax      = common.NewSearchParam(common.SearchEnum_SoftMax, 0.5)
 		search_UCB          = common.NewSearchParam(common.SearchEnum_UCB)
-		agents              = []common.AgentModel{
+		agents              = []common.Agent{
 			NewModelFree(search_MC),
 			NewModelFree(search_AvgQ),
 			NewModelFree(search_EpsilonGreed),
@@ -53,7 +53,7 @@ func Test_model_free_1(t *testing.T) {
 		search_EpsilonGreed = common.NewSearchParam(common.SearchEnum_EpsilonGreed, 0.5)
 		search_SoftMax      = common.NewSearchParam(common.SearchEnum_SoftMax, 0.5)
 		search_UCB          = common.NewSearchParam(common.SearchEnum_UCB)
-		agents              = []common.AgentModel{
+		agents              = []common.Agent{
 			NewModelFree(search_MC),
 			NewModelFree(search_AvgQ),
 			NewModelFree(search_EpsilonGreed),

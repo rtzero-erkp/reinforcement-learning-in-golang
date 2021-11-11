@@ -116,3 +116,25 @@ const (
 func (p ModelEnum) String() string {
 	return string(p)
 }
+
+type UpdateParam struct {
+	Model UpdateEnum
+	Args  []interface{}
+}
+type SearchParam struct {
+	Model SearchEnum
+	Args  []interface{}
+}
+
+func NewUpdateParam(mode UpdateEnum, args ...interface{}) *UpdateParam {
+	return &UpdateParam{
+		Model: mode,
+		Args:  args,
+	}
+}
+func NewSearchParam(mode SearchEnum, args ...interface{}) *SearchParam {
+	return &SearchParam{
+		Model: mode,
+		Args:  args,
+	}
+}

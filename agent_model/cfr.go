@@ -3,7 +3,7 @@ package agent_model
 //var _ common.AgentModel = &Cfr{}
 //
 //type Cfr struct {
-//	model *common.ModelTree // 模型
+//	model *common.AgentModelTree // 模型
 //}
 //
 //func (p *Cfr) Reset() {

@@ -5,7 +5,7 @@ package agent_model
 //type MCTS struct {
 //	env    common.Env
 //	mcNum  int
-//	model  *common.ModelTree
+//	model  *common.AgentModelTree
 //	method common.MethodEnum
 //	arg    []interface{}
 //}

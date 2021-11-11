@@ -5,17 +5,17 @@ import (
 	"gameServer/common"
 )
 
-var _ common.AgentModel = &ModelFree{}
+var _ common.Agent = &AgentModelFree{}
 
-type ModelFree struct {
+type AgentModelFree struct {
 	accum  common.Accumulate
 	search *common.SearchParam
 }
 
-func (p *ModelFree) String() string {
-	return fmt.Sprintf("ModelFree:%v", p.search)
+func (p *AgentModelFree) String() string {
+	return fmt.Sprintf("AgentModelFree:%v", p.search)
 }
-func (p *ModelFree) Train(env common.Env, trainNum int) interface{} {
+func (p *AgentModelFree) Train(env common.Env, trainNum int) interface{} {
 	p.accum.Reset()
 	for i0 := 0; i0 < trainNum; i0++ {
 		// reset
@@ -38,12 +38,12 @@ func (p *ModelFree) Train(env common.Env, trainNum int) interface{} {
 	}
 	return p.accum
 }
-func (p *ModelFree) Policy(env common.Env) (act common.ActionEnum) {
+func (p *AgentModelFree) Policy(env common.Env) (act common.ActionEnum) {
 	act = p.accum.Sample(env.Space(), common.NewSearchParam(common.SearchEnum_AvgQ))
 	return
 }
-func NewModelFree(search *common.SearchParam) common.AgentModel {
-	var p = &ModelFree{
+func NewModelFree(search *common.SearchParam) common.Agent {
+	var p = &AgentModelFree{
 		search: search,
 		accum:  common.NewAccumulate(),
 	}
