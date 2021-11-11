@@ -78,21 +78,41 @@ func (p CardEnum) Small(a CardEnum) bool {
 	return p < a
 }
 
-type SearchMethod int
+type SearchEnum string
 
 const (
-	SearchMethodEnum_Random       SearchMethod = 4
-	SearchMethodEnum_MeanQ        SearchMethod = 3
-	SearchMethodEnum_EpsilonGreed SearchMethod = 2
-	SearchMethodEnum_SoftMax      SearchMethod = 1
-	SearchMethodEnum_UCB          SearchMethod = 0
+	SearchEnum_MC           SearchEnum = "MC"
+	SearchEnum_AvgQ         SearchEnum = "AvgQ"
+	SearchEnum_EpsilonGreed SearchEnum = "EpsilonGreed"
+	SearchEnum_SoftMax      SearchEnum = "SoftMax"
+	SearchEnum_UCB          SearchEnum = "UCB"
 )
 
-type ModelType int
+func (p SearchEnum) String() string {
+	return string(p)
+}
+
+type UpdateEnum string
 
 const (
-	ModelTypeEnum_Value  ModelType = 3
-	ModelTypeEnum_Policy ModelType = 2
-	ModelTypeEnum_Q      ModelType = 1
-	ModelTypeEnum_Cfr    ModelType = 0
+	UpdateEnum_AvgQ  UpdateEnum = "AvgQ"
+	UpdateEnum_DT    UpdateEnum = "DT"
+	UpdateEnum_SARSA UpdateEnum = "SARSA"
 )
+
+func (p UpdateEnum) String() string {
+	return string(p)
+}
+
+type ModelEnum string
+
+const (
+	NodeEnum_Value  ModelEnum = "Value"
+	NodeEnum_Policy ModelEnum = "Policy"
+	NodeEnum_Q      ModelEnum = "Q"
+	NodeEnum_Cfr    ModelEnum = "Cfr"
+)
+
+func (p ModelEnum) String() string {
+	return string(p)
+}

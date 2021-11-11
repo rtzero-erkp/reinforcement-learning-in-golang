@@ -1,105 +1,131 @@
 package common
 
-import "log"
+import (
+	"fmt"
+	"log"
+)
 
-type Node interface{}
-type NodePolicy struct {
-	Accum Accumulate
+type UpdateParam struct {
+	Model UpdateEnum
+	Args  []interface{}
 }
-type NodeQ struct {
-	Accum Accumulate
-}
-type NodeValue struct {
-	Value float64
-}
-type NodeCfr struct{}
 
-func NewNode(mode ModelType) Node {
-	var node Node
-	switch mode {
-	case ModelTypeEnum_Value:
-		node = &NodeValue{Value: 0}
-	case ModelTypeEnum_Policy:
-		node = &NodePolicy{Accum: NewAccum()}
-	case ModelTypeEnum_Q:
-		node = &NodeQ{Accum: NewAccum()}
-	case ModelTypeEnum_Cfr:
-		node = &NodeCfr{}
-	default:
-		log.Fatalf("unknown mode %v", mode)
+type SearchParam struct {
+	Model SearchEnum
+	Args  []interface{}
+}
+
+func NewUpdateParam(mode UpdateEnum, args ...interface{}) *UpdateParam {
+	return &UpdateParam{
+		Model: mode,
+		Args:  args,
 	}
-	return node
+}
+func NewSearchParam(mode SearchEnum, args ...interface{}) *SearchParam {
+	return &SearchParam{
+		Model: mode,
+		Args:  args,
+	}
 }
 
 type ModelMap struct {
-	mode  ModelType
-	nodes map[string]Node
+	model  ModelEnum
+	update *UpdateParam
+	nodes  map[string]interface{}
 }
 
-func NewModelMap(mode ModelType) *ModelMap {
-	return &ModelMap{
-		mode:  mode,
-		nodes: map[string]Node{},
-	}
+func NewModelMap(model ModelEnum, update *UpdateParam) *ModelMap {
+	var o = &ModelMap{model: model, update: update, nodes: map[string]interface{}{}}
+	return o
 }
-func (p *ModelMap) Find(code string) Node {
-	var node, ok = p.nodes[code]
-	if !ok {
-		node = NewNode(p.mode)
-		p.nodes[code] = node
-	}
-	return node
-}
+
 func (p *ModelMap) Clear() {
-	p.nodes = map[string]Node{}
+	p.nodes = map[string]interface{}{}
+}
+func (p *ModelMap) String() string {
+	var line = fmt.Sprintf("[model] model:%v, update:%v\n", p.model, p.update)
+	for k, v := range p.nodes {
+		line += fmt.Sprintf("[model] %v:%v\n", k, v)
+	}
+	return line
+}
+func (p *ModelMap) Sample(env Env, encoder Encoder, search *SearchParam) (act ActionEnum) {
+	switch p.model {
+	case NodeEnum_Value:
+		act = p.sampleV(env, encoder, search)
+	case NodeEnum_Q:
+		act = p.sampleQ(env, encoder, search)
+	default:
+		act = env.Space().Sample()
+	}
+	return act
+}
+func (p *ModelMap) Update(mem *MemoryCode) {
+	switch p.model {
+	case NodeEnum_Value:
+		p.updateV(mem)
+	case NodeEnum_Q:
+		p.updateQ(mem)
+	}
 }
 
-type ModelTree struct {
-	mode  ModelType
-	node  Node
-	child map[ActionEnum]*ModelTree
+func (p *ModelMap) sampleV(env Env, encoder Encoder, search *SearchParam) (act ActionEnum) {
+	accum := NewAccumulate()
+	for _, actI := range env.Space().Acts() {
+		envCrt := env.Clone()
+		res := envCrt.Step(actI)
+		var code = encoder.Hash(res.State)
+		var reward, ok = p.nodes[code]
+		if !ok {
+			reward = 0.0
+			p.nodes[code] = reward
+		}
+		accum.Add(actI, reward.(float64))
+	}
+	act = accum.Sample(env.Space(), search)
+	return
 }
+func (p *ModelMap) sampleQ(env Env, encoder Encoder, search *SearchParam) (act ActionEnum) {
+	var code = encoder.Hash(env.State())
+	var accum, ok = p.nodes[code]
+	if !ok {
+		accum = NewAccumulate()
+		p.nodes[code] = accum
+	}
+	act = accum.(Accumulate).Sample(env.Space(), search)
+	return act
+}
+func (p *ModelMap) updateV(mem *MemoryCode) {
+	var codeFrom = mem.From
+	var codeTo = mem.To
+	var valueFrom, ok0 = p.nodes[codeFrom]
+	var valueTo, ok1 = p.nodes[codeTo]
+	if !ok0 {
+		valueFrom = 0.0
+		p.nodes[codeFrom] = valueFrom
+	}
+	if !ok1 {
+		valueTo = 0.0
+		p.nodes[codeTo] = valueTo
+	}
 
-func NewModelTree(mode ModelType) *ModelTree {
-	return &ModelTree{
-		mode:  mode,
-		node:  NewNode(mode),
-		child: map[ActionEnum]*ModelTree{},
+	switch p.update.Model {
+	case UpdateEnum_DT:
+		// v(s) = v(s) + alpha * (r + lambda * (v(s') - v(s)))
+		alpha := p.update.Args[0].(float64)
+		lambda := p.update.Args[1].(float64)
+		valueFrom = valueFrom.(float64) + alpha*(mem.Reward+lambda*(valueTo.(float64)-valueFrom.(float64)))
+		p.nodes[codeFrom] = valueFrom
+	case UpdateEnum_SARSA:
+		log.Fatal("not impl")
 	}
 }
-func (p *ModelTree) Find(history ...ActionEnum) Node {
-	var target = p
-	for _, act := range history {
-		var next, ok = target.child[act]
-		if !ok {
-			next = &ModelTree{
-				mode:  p.mode,
-				node:  NewNode(p.mode),
-				child: map[ActionEnum]*ModelTree{},
-			}
-			target.child[act] = next
-		}
-		target = next
+func (p *ModelMap) updateQ(mem *MemoryCode) {
+	var code = mem.From
+	var accum, ok = p.nodes[code]
+	if !ok {
+		accum = NewAccumulate()
+		p.nodes[code] = accum
 	}
-	return target.node
-}
-func (p *ModelTree) Move(history ...ActionEnum) *ModelTree {
-	var target = p
-	for _, act := range history {
-		var next, ok = target.child[act]
-		if !ok {
-			next = &ModelTree{
-				mode:  p.mode,
-				node:  NewNode(p.mode),
-				child: map[ActionEnum]*ModelTree{},
-			}
-			target.child[act] = next
-		}
-		target = next
-	}
-	return target
-}
-func (p *ModelTree) Clear() {
-	p.node = NewNode(p.mode)
-	p.child = map[ActionEnum]*ModelTree{}
+	accum.(Accumulate).Add(mem.Act, mem.Reward)
 }

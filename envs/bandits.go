@@ -46,7 +46,7 @@ func (p *BanditsEnv) String() string {
 }
 func (p *BanditsEnv) Step(act common.ActionEnum) (res *common.Result) {
 	if !p.space.Contain(act) {
-		log.Fatal(fmt.Sprintf("actions space not contain act:%v", act))
+		log.Fatal(fmt.Sprintf("space not contain act:%v", act))
 	}
 	var val = p.info.Get(fmt.Sprintf("ex%v", act)).(float64)
 	var reward = []float64{val}
