@@ -11,21 +11,21 @@ import (
 
 func Test_model_free_0(t *testing.T) {
 	var (
-		env                 = envs.NewBanditsEnv(5)
-		search_MC           = common.NewSearchParam(common.SearchEnum_MC)
-		search_EpsilonGreed = common.NewSearchParam(common.SearchEnum_EpsilonGreed, 0.5)
-		search_SoftMax      = common.NewSearchParam(common.SearchEnum_SoftMax, 0.5)
-		search_UCB          = common.NewSearchParam(common.SearchEnum_UCB)
-		agents              = []common.Agent{
+		env       = envs.NewBanditsEnv(5)
+		search_MC = common.NewSearchMethod(common.SearchEnum_MC)
+		//search_EpsilonGreed = common.NewSearchMethod(common.SearchEnum_EpsilonGreed, 0.5)
+		//search_SoftMax      = common.NewSearchMethod(common.SearchEnum_SoftMax, 0.5)
+		//search_UCB          = common.NewSearchMethod(common.SearchEnum_UCB)
+		agents = []common.Agent{
 			NewModelFree(search_MC),
-			NewModelFree(search_EpsilonGreed),
-			NewModelFree(search_SoftMax),
-			NewModelFree(search_UCB),
+			//NewModelFree(search_EpsilonGreed),
+			//NewModelFree(search_SoftMax),
+			//NewModelFree(search_UCB),
 		}
 	)
-	for _, agent := range agents {
-		Convey(fmt.Sprintf("[Test_model_free_0] env:%v, agent:%v", env, agent), t, func() {
-			log.Printf("[Test_model_free_0] env:%v, agent:%v", env, agent)
+	Convey(fmt.Sprintf("[Test_model_free_0] env:%v", env), t, func() {
+		for _, agent := range agents {
+			log.Printf("agent:%v", agent)
 			_, info := env.Reset()
 			agent.Train(env, 200)
 			act := agent.Policy(env)
@@ -38,18 +38,18 @@ func Test_model_free_0(t *testing.T) {
 				}
 			}
 			log.Printf("act:%v is best", act)
-		})
-	}
+		}
+	})
 }
 
 func Test_model_free_1(t *testing.T) {
 	const rewardLimit = 3000.0
 	var (
 		env                 = envs.NewCartPoleEnv(2.4, 12)
-		search_MC           = common.NewSearchParam(common.SearchEnum_MC)
-		search_EpsilonGreed = common.NewSearchParam(common.SearchEnum_EpsilonGreed, 0.5)
-		search_SoftMax      = common.NewSearchParam(common.SearchEnum_SoftMax, 0.5)
-		search_UCB          = common.NewSearchParam(common.SearchEnum_UCB)
+		search_MC           = common.NewSearchMethod(common.SearchEnum_MC)
+		search_EpsilonGreed = common.NewSearchMethod(common.SearchEnum_EpsilonGreed, 0.5)
+		search_SoftMax      = common.NewSearchMethod(common.SearchEnum_SoftMax, 0.5)
+		search_UCB          = common.NewSearchMethod(common.SearchEnum_UCB)
 		agents              = []common.Agent{
 			NewModelFree(search_MC),
 			NewModelFree(search_EpsilonGreed),
@@ -57,9 +57,9 @@ func Test_model_free_1(t *testing.T) {
 			NewModelFree(search_UCB),
 		}
 	)
-	for _, agent := range agents {
-		Convey(fmt.Sprintf("[Test_model_free_1] env:%v, agent:%v", env, agent), t, func() {
-			log.Printf("[Test_model_free_1] env:%v, agent:%v", env, agent)
+	Convey(fmt.Sprintf("[Test_model_free_1] env:%v", env), t, func() {
+		for _, agent := range agents {
+			log.Printf("agent:%v", agent)
 			env.Reset()
 			reward := 0.0
 			for {
@@ -76,17 +76,17 @@ func Test_model_free_1(t *testing.T) {
 				}
 			}
 			log.Printf("reward:%v", reward)
-		})
-	}
+		}
+	})
 }
 
 func Test_model_free_2(t *testing.T) {
 	var (
 		env                 = envs.NewMazeEnv(3, 3)
-		search_MC           = common.NewSearchParam(common.SearchEnum_MC)
-		search_EpsilonGreed = common.NewSearchParam(common.SearchEnum_EpsilonGreed, 0.5)
-		search_SoftMax      = common.NewSearchParam(common.SearchEnum_SoftMax, 0.5)
-		search_UCB          = common.NewSearchParam(common.SearchEnum_UCB)
+		search_MC           = common.NewSearchMethod(common.SearchEnum_MC)
+		search_EpsilonGreed = common.NewSearchMethod(common.SearchEnum_EpsilonGreed, 0.5)
+		search_SoftMax      = common.NewSearchMethod(common.SearchEnum_SoftMax, 0.5)
+		search_UCB          = common.NewSearchMethod(common.SearchEnum_UCB)
 		agents              = []common.Agent{
 			NewModelFree(search_MC),
 			NewModelFree(search_EpsilonGreed),
@@ -94,9 +94,9 @@ func Test_model_free_2(t *testing.T) {
 			NewModelFree(search_UCB),
 		}
 	)
-	for _, agent := range agents {
-		Convey(fmt.Sprintf("[Test_model_free_2] env:%v, agent:%v", env, agent), t, func() {
-			log.Printf("[Test_model_free_2] env:%v, agent:%v", env, agent)
+	Convey(fmt.Sprintf("[Test_model_free_2] env:%v", env), t, func() {
+		for _, agent := range agents {
+			log.Printf("agent:%v", agent)
 			env.Reset()
 			reward := 0.0
 			step := 0.0
@@ -111,6 +111,6 @@ func Test_model_free_2(t *testing.T) {
 				}
 			}
 			log.Printf("reward:%v, step:%v", reward, step)
-		})
-	}
+		}
+	})
 }

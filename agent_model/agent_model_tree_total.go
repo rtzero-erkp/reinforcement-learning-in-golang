@@ -8,7 +8,7 @@ import (
 var _ common.Agent = &AgentModelTree{}
 
 type AgentModelTree struct {
-	search *common.SearchParam
+	search *common.SearchMethod
 	model  *common.ModelTree
 }
 
@@ -39,11 +39,11 @@ func (p *AgentModelTree) Train(env common.Env, trainNum int) interface{} {
 }
 func (p *AgentModelTree) Policy(env common.Env) (act common.ActEnum) {
 	node := p.model.Find()
-	act = node.Sample(env, common.NewSearchParam(common.SearchEnum_AvgQ))
+	act = node.Sample(env, common.NewSearchMethod(common.SearchEnum_AvgQ))
 	p.model.Move(act)
 	return
 }
-func NewModelTree(modelTree *common.ModelTree, search *common.SearchParam) common.Agent {
+func NewModelTree(modelTree *common.ModelTree, search *common.SearchMethod) common.Agent {
 	var p = &AgentModelTree{
 		search: search,
 		model:  modelTree,

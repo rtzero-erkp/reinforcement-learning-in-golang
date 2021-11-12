@@ -80,7 +80,7 @@ func (p *CartPoleEnv) Acts() common.Acts {
 	return p.acts
 }
 func (p *CartPoleEnv) State() common.Info {
-	return p.state
+	return p.state.Clone()
 }
 func (p *CartPoleEnv) Reset() (common.Info, common.Info) {
 	p.state.Set("x", rand.Float64()*0.1-0.05)
@@ -88,7 +88,7 @@ func (p *CartPoleEnv) Reset() (common.Info, common.Info) {
 	p.state.Set("theta", rand.Float64()*0.1-0.05)
 	p.state.Set("thetaDot", rand.Float64()*0.1-0.05)
 	p.info.Set("step", 0)
-	return p.state, p.info
+	return p.state.Clone(), p.info.Clone()
 }
 func (p *CartPoleEnv) Step(act common.ActEnum) (res *common.Result) {
 	if !p.acts.Contain(act) {
@@ -136,7 +136,6 @@ func (p *CartPoleEnv) Step(act common.ActEnum) (res *common.Result) {
 	p.state.Set("thetaDot", thetaDot)
 
 	res = &common.Result{}
-	res.State = p.state
 	res.Done = (x < -p.xRange) ||
 		(x > p.xRange) ||
 		(theta < -p.thetaRange) ||
@@ -149,6 +148,7 @@ func (p *CartPoleEnv) Step(act common.ActEnum) (res *common.Result) {
 	} else {
 		res.Reward = []float64{0.0}
 	}
-	res.Info = p.info
+	res.State = p.state.Clone()
+	res.Info = p.info.Clone()
 	return res
 }

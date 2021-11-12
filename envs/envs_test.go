@@ -18,9 +18,9 @@ func TestEnvs0(t *testing.T) {
 			NewAKQEnv(3),
 		}
 	)
-	for _, env := range envs {
-		Convey(fmt.Sprintf("[TestEnvs0] env:%v", env), t, func() {
-			log.Printf("[TestEnvs0] env:%v", env)
+	Convey(fmt.Sprintf("[TestEnvs0]"), t, func() {
+		for _, env := range envs {
+			log.Printf("env:%v", env)
 			env.Reset()
 			step := 0
 			for {
@@ -33,6 +33,6 @@ func TestEnvs0(t *testing.T) {
 			}
 			log.Print(res)
 			log.Printf("step:%v", step)
-		})
-	}
+		}
+	})
 }

@@ -63,7 +63,7 @@ func (p *AKQEnv) Acts() common.Acts {
 	return p.acts
 }
 func (p *AKQEnv) State() common.Info {
-	return p.state
+	return p.state.Clone()
 }
 func (p *AKQEnv) Reset() (common.Info, common.Info) {
 	var dealt = []common.CardEnum{common.CardEnum_CardA, common.CardEnum_CardK, common.CardEnum_CardQ}
@@ -78,7 +78,7 @@ func (p *AKQEnv) Reset() (common.Info, common.Info) {
 	p.state.Set("crt", common.PlayerEnum_1)
 	p.acts.Clear()
 	p.acts.AddEnum(common.ActionEnum_Bet, common.ActionEnum_Fold)
-	return p.state, p.info
+	return p.state.Clone(), p.info.Clone()
 }
 func (p *AKQEnv) Step(act common.ActEnum) (res *common.Result) {
 	if !p.acts.Contain(act) {
@@ -90,12 +90,14 @@ func (p *AKQEnv) Step(act common.ActEnum) (res *common.Result) {
 	var anti float64 = 1
 	p.state.Set(player+":act", act)
 
-	res = &common.Result{State: p.state, Info: p.info}
+	res = &common.Result{}
 	if player == common.PlayerEnum_1 {
 		if act == common.ActionEnum_Fold {
 			res.Done = true
 			res.Reward = []float64{-anti, +anti}
 			p.state.Set("crt", common.PlayerEnum_unknown)
+			res.State = p.state.Clone()
+			res.Info = p.info.Clone()
 			return
 		} else
 		if act == common.ActionEnum_Bet {
@@ -104,6 +106,8 @@ func (p *AKQEnv) Step(act common.ActEnum) (res *common.Result) {
 			p.state.Set("crt", common.PlayerEnum_2)
 			res.Done = false
 			res.Reward = []float64{}
+			res.State = p.state.Clone()
+			res.Info = p.info.Clone()
 			return
 		}
 	}
@@ -112,6 +116,8 @@ func (p *AKQEnv) Step(act common.ActEnum) (res *common.Result) {
 			res.Done = true
 			res.Reward = []float64{+anti, -anti}
 			p.state.Set("crt", common.PlayerEnum_unknown)
+			res.State = p.state.Clone()
+			res.Info = p.info.Clone()
 			return
 		} else
 		if act == common.ActionEnum_Call {
@@ -127,6 +133,8 @@ func (p *AKQEnv) Step(act common.ActEnum) (res *common.Result) {
 			}
 			res.Done = true
 			p.state.Set("crt", common.PlayerEnum_unknown)
+			res.State = p.state.Clone()
+			res.Info = p.info.Clone()
 			return
 		}
 	}

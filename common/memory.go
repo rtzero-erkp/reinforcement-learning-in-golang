@@ -1,11 +1,6 @@
 package common
 
-type Memory struct {
-	From   Info
-	Act    ActEnum
-	To     Info
-	Reward float64
-}
+import "fmt"
 
 type MemoryCode struct {
 	From   Code
@@ -14,28 +9,9 @@ type MemoryCode struct {
 	Reward float64
 }
 
-type Mem struct {
-	mem []*Memory
-}
-
-func NewMem() *Mem {
-	return &Mem{
-		mem: []*Memory{},
-	}
-}
-func (p *Mem) Add(from Info, act ActEnum, to Info, reward float64) {
-	var mem = &Memory{
-		From:   from.Clone(),
-		Act:    act,
-		To:     to.Clone(),
-		Reward: reward}
-	p.mem = append(p.mem, mem)
-}
-func (p *Mem) Clear() {
-	p.mem = []*Memory{}
-}
-func (p *Mem) Get() []*Memory {
-	return p.mem
+func (p *MemoryCode) String() string {
+	var line = fmt.Sprintf("From:%v, Act:%v, To:%v, Reward:%v", p.From, p.Act, p.To, p.Reward)
+	return line
 }
 
 type MemCode struct {

@@ -2,6 +2,7 @@ package common
 
 import (
 	"fmt"
+	"log"
 	"math/rand"
 )
 
@@ -115,4 +116,33 @@ func (p *ActsVec) AddNum(num int) {
 }
 func (p *ActsVec) Clear() {
 	p.acts = []ActEnum{}
+}
+
+type ActsMax struct {
+	acts []ActEnum
+	max  float64
+}
+
+func NewActsMax() *ActsMax {
+	return &ActsMax{
+		acts: []ActEnum{},
+		max:  0,
+	}
+}
+func (p *ActsMax) Add(act ActEnum, val float64) {
+	if (len(p.acts) == 0) || (val > p.max) {
+		p.acts = []ActEnum{act}
+		p.max = val
+	} else
+	if val == p.max {
+		p.acts = append(p.acts, act)
+	}
+}
+func (p *ActsMax) Sample() (act ActEnum) {
+	if len(p.acts) == 0 {
+		log.Fatalln("acts is nil")
+	}
+	var idx = rand.Intn(len(p.acts))
+	act = p.acts[idx]
+	return
 }

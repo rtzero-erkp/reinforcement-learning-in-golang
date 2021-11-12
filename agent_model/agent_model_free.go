@@ -9,7 +9,7 @@ var _ common.Agent = &AgentModelFree{}
 
 type AgentModelFree struct {
 	accum  common.Accumulate
-	search *common.SearchParam
+	search *common.SearchMethod
 }
 
 func (p *AgentModelFree) String() string {
@@ -23,7 +23,7 @@ func (p *AgentModelFree) Train(env common.Env, trainNum int) interface{} {
 		reward := 0.0
 		// target
 		acts := envCrt.Acts()
-		target := p.accum.Sample(acts, p.search)
+		target := p.search.Accum(p.accum, acts)
 		act := target
 		// simulate
 		for {
@@ -42,10 +42,10 @@ func (p *AgentModelFree) Train(env common.Env, trainNum int) interface{} {
 	return p.accum
 }
 func (p *AgentModelFree) Policy(env common.Env) (act common.ActEnum) {
-	act = p.accum.Sample(env.Acts(), common.NewSearchParam(common.SearchEnum_AvgQ))
+	act = common.SearchArgQ.Accum(p.accum, env.Acts())
 	return
 }
-func NewModelFree(search *common.SearchParam) common.Agent {
+func NewModelFree(search *common.SearchMethod) common.Agent {
 	var p = &AgentModelFree{
 		search: search,
 		accum:  common.NewAccumulate(),

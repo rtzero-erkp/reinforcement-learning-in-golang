@@ -40,7 +40,7 @@ func (p *MazeEnv) Acts() common.Acts {
 	return p.acts
 }
 func (p *MazeEnv) State() common.Info {
-	return p.state
+	return p.state.Clone()
 }
 func (p *MazeEnv) Reset() (common.Info, common.Info) {
 	var start = common.ActEnum("0")
@@ -59,7 +59,7 @@ func (p *MazeEnv) Reset() (common.Info, common.Info) {
 
 	p.gen(start)
 
-	return p.state, p.info
+	return p.state.Clone(), p.info.Clone()
 }
 func (p *MazeEnv) Step(act common.ActEnum) (res *common.Result) {
 	if !p.acts.Contain(act) {
@@ -72,10 +72,8 @@ func (p *MazeEnv) Step(act common.ActEnum) (res *common.Result) {
 	step := p.info.Get("step").(float64)
 
 	res = &common.Result{
-		State:  p.state,
 		Reward: []float64{0},
 		Done:   end == act,
-		Info:   p.info,
 	}
 	if res.Done {
 		res.Reward[0] = 1.0 / step
@@ -84,6 +82,8 @@ func (p *MazeEnv) Step(act common.ActEnum) (res *common.Result) {
 		p.info.Set("step", step+1)
 		p.gen(act)
 	}
+	res.State = p.state.Clone()
+	res.Info = p.info.Clone()
 
 	return res
 }

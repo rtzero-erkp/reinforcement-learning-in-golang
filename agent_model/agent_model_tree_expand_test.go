@@ -9,30 +9,29 @@ import (
 	"testing"
 )
 
-func Test_model_map_0(t *testing.T) {
+func Test_model_tree_expand_0(t *testing.T) {
 	var (
-		encoder             = common.NewEncoderFloat64([]string{}, []float64{})
 		env                 = envs.NewBanditsEnv(5)
 		update_AvgQ         = common.NewUpdateMethod(common.UpdateEnum_AvgQ)
 		search_MC           = common.NewSearchMethod(common.SearchEnum_MC)
 		search_EpsilonGreed = common.NewSearchMethod(common.SearchEnum_EpsilonGreed, 0.5)
 		search_SoftMax      = common.NewSearchMethod(common.SearchEnum_SoftMax, 0.5)
 		search_UCB          = common.NewSearchMethod(common.SearchEnum_UCB)
-		modelMap            = common.NewModelMap(common.NodeEnum_Q)
+		modelTree           = common.NewModelTree(common.NodeEnum_Q, update_AvgQ)
 		agents              = []common.Agent{
-			NewModelMap(modelMap, search_MC, update_AvgQ, encoder),
-			NewModelMap(modelMap, search_EpsilonGreed, update_AvgQ, encoder),
-			NewModelMap(modelMap, search_SoftMax, update_AvgQ, encoder),
-			NewModelMap(modelMap, search_UCB, update_AvgQ, encoder),
+			NewModelTreeExpand(modelTree, search_MC),
+			NewModelTreeExpand(modelTree, search_EpsilonGreed),
+			NewModelTreeExpand(modelTree, search_SoftMax),
+			NewModelTreeExpand(modelTree, search_UCB),
 		}
 	)
-	Convey(fmt.Sprintf("[Test_model_map_0] env:%v", env), t, func() {
+	Convey(fmt.Sprintf("[Test_model_tree_expand_0] env:%v", env), t, func() {
 		for _, agent := range agents {
 			log.Printf("agent:%v", agent)
 			_, info := env.Reset()
 			//log.Printf("env:%v", info)
 
-			modelMap.Reset()
+			modelTree.Reset()
 			agent.Train(env, 200)
 			act := agent.Policy(env)
 
@@ -48,79 +47,73 @@ func Test_model_map_0(t *testing.T) {
 	})
 }
 
-func Test_model_map_1(t *testing.T) {
+func Test_model_tree_expand_1(t *testing.T) {
 	const rewardLimit = 3000.0
 	var (
-		encoder = common.NewEncoderFloat64(
-			[]string{"x", "xDot", "theta", "thetaDot"},
-			[]float64{50 / 2.4, 20, 50 / 12, 20})
 		env                 = envs.NewCartPoleEnv(2.4, 12)
 		update_AvgQ         = common.NewUpdateMethod(common.UpdateEnum_AvgQ)
 		search_MC           = common.NewSearchMethod(common.SearchEnum_MC)
 		search_EpsilonGreed = common.NewSearchMethod(common.SearchEnum_EpsilonGreed, 0.5)
 		search_SoftMax      = common.NewSearchMethod(common.SearchEnum_SoftMax, 0.5)
 		search_UCB          = common.NewSearchMethod(common.SearchEnum_UCB)
-		modelMap            = common.NewModelMap(common.NodeEnum_Q)
+		modelTree           = common.NewModelTree(common.NodeEnum_Q, update_AvgQ)
 		agents              = []common.Agent{
-			NewModelMap(modelMap, search_MC, update_AvgQ, encoder),
-			NewModelMap(modelMap, search_EpsilonGreed, update_AvgQ, encoder),
-			NewModelMap(modelMap, search_SoftMax, update_AvgQ, encoder),
-			NewModelMap(modelMap, search_UCB, update_AvgQ, encoder),
+			NewModelTreeExpand(modelTree, search_MC),
+			NewModelTreeExpand(modelTree, search_EpsilonGreed),
+			NewModelTreeExpand(modelTree, search_SoftMax),
+			NewModelTreeExpand(modelTree, search_UCB),
 		}
 	)
-	Convey(fmt.Sprintf("[Test_model_map_1] env:%v", env), t, func() {
+	Convey(fmt.Sprintf("[Test_model_tree_expand_1] env:%v", env), t, func() {
 		for _, agent := range agents {
 			log.Printf("agent:%v", agent)
 			env.Reset()
-			modelMap.Reset()
+			modelTree.Reset()
 			reward := 0.0
-			step := 0.0
 			for {
-				//agent.Train(env, 200)
-				agent.Train(env, 10)
+				agent.Train(env, 200)
 				act := agent.Policy(env)
-				//log.Printf("state:%v, act:%v", env.State(), act)
 				res := env.Step(act)
 				reward += res.Reward[0]
-				step += 1
 				if res.Done {
 					break
 				}
+				if reward > rewardLimit {
+					log.Printf("reward:%v > rewardLimit:%v", reward, rewardLimit)
+					break
+				}
 			}
-			log.Printf("reward:%v, step:%v", reward, step)
+			log.Printf("reward:%v", reward)
 		}
 	})
 }
 
-func Test_model_map_2(t *testing.T) {
+func Test_model_tree_expand_2(t *testing.T) {
 	var (
-		encoder     = common.NewEncoderString([]string{"pt"})
+		// 不推荐使用Tree方式, 导致内存不可控
 		env         = envs.NewMazeEnv(3, 3)
 		update_AvgQ = common.NewUpdateMethod(common.UpdateEnum_AvgQ)
-		search_MC   = common.NewSearchMethod(common.SearchEnum_MC)
+		//search_MC           = common.NewSearchMethod(common.SearchEnum_MC)
 		//search_EpsilonGreed = common.NewSearchMethod(common.SearchEnum_EpsilonGreed, 0.5)
 		//search_SoftMax      = common.NewSearchMethod(common.SearchEnum_SoftMax, 0.5)
 		//search_UCB          = common.NewSearchMethod(common.SearchEnum_UCB)
-		modelMap = common.NewModelMap(common.NodeEnum_Q)
-		agents   = []common.Agent{
-			NewModelMap(modelMap, search_MC, update_AvgQ, encoder),
-			//NewModelMap(modelMap, search_EpsilonGreed, encoder),
-			//NewModelMap(modelMap, search_SoftMax, encoder),
-			//NewModelMap(modelMap, search_UCB, encoder),
+		modelTree = common.NewModelTree(common.NodeEnum_Q, update_AvgQ)
+		agents    = []common.Agent{
+			//NewModelTreeExpand(modelTree, search_MC),
+			//NewModelTreeExpand(modelTree, search_EpsilonGreed),
+			//NewModelTreeExpand(modelTree, search_SoftMax),
+			//NewModelTreeExpand(modelTree, search_UCB),
 		}
 	)
-	Convey(fmt.Sprintf("[Test_model_map_2] env:%v", env), t, func() {
+	Convey(fmt.Sprintf("[Test_model_tree_expand_2] env:%v", env), t, func() {
 		for _, agent := range agents {
 			log.Printf("agent:%v", agent)
 			env.Reset()
-			modelMap.Reset()
+			modelTree.Reset()
 			reward := 0.0
 			step := 0.0
 			for {
-				//agent.Train(env, 200)
-				//agent.Train(env, 10)
-				agent.Train(env, 2)
-				break
+				agent.Train(env, 200)
 				act := agent.Policy(env)
 				//log.Printf("state:%v, act:%v", env.State(), act)
 				res := env.Step(act)

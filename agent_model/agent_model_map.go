@@ -8,8 +8,9 @@ import (
 var _ common.Agent = &AgentModelMap{}
 
 type AgentModelMap struct {
-	search  *common.SearchParam
+	search  *common.SearchMethod
 	model   *common.ModelMap
+	update  *common.UpdateMethod
 	encoder common.Encoder
 }
 
@@ -27,13 +28,23 @@ func (p *AgentModelMap) Train(env common.Env, trainNum int) interface{} {
 		var envCrt = env.Clone()
 		state := envCrt.State()
 		// sim to end
+		//first := true
 		for {
 			//log.Println("[agent] ===[step]===")
+			//if first {
+			//	log.Println("[agent] ===[first]===")
+			//}
 			act := p.model.Sample(envCrt, p.encoder, p.search)
+			//if first {
 			//log.Printf("[agent] act:%10v, acts:%v", act, envCrt.Acts())
+			//	log.Println("[agent] ---[first]---")
+			//}
+			//break
 			res = envCrt.Step(act)
 			mem.Add(p.encoder.Hash(state), act, p.encoder.Hash(res.State), res.Reward[0])
+			//break
 			state = res.State
+			//first = false
 			if res.Done {
 				break
 			}
@@ -45,19 +56,33 @@ func (p *AgentModelMap) Train(env common.Env, trainNum int) interface{} {
 		for i1 := 0; i1 < memoriesLen; i1++ {
 			memI := memories[memoriesLen-1-i1]
 			reward += memI.Reward
+			//log.Printf("i1:%v, mem:%v, reward:%v", i1, memI, reward)
 			memI.Reward = reward
-			p.model.Update(memI)
+			p.update.QMap(memI, p.model)
 		}
+		//log.Println("[agent] ===[test]===")
+		//code := p.encoder.Hash(env.State())
+		//node := p.model.Find(code).(common.Accumulate)
+		//log.Printf("[agent] acts:%v", env.Acts())
+		//log.Printf("[agent] node:%v", node)
+		//log.Println("[agent] ---[test]---")
 	}
 	return p.model
 }
 func (p *AgentModelMap) Policy(env common.Env) (act common.ActEnum) {
-	return p.model.Sample(env, p.encoder, common.NewSearchParam(common.SearchEnum_AvgQ))
+	act = p.model.Sample(env, p.encoder, common.NewSearchMethod(common.SearchEnum_AvgQ))
+	//code := p.encoder.Hash(env.State())
+	//node := p.model.Find(code).(common.Accumulate)
+	//log.Printf("code:%v", code)
+	//log.Printf("acts:%v", env.Acts())
+	//log.Println(node)
+	return
 }
-func NewModelMap(modelMap *common.ModelMap, search *common.SearchParam, encoder common.Encoder) common.Agent {
+func NewModelMap(modelMap *common.ModelMap, search *common.SearchMethod, update *common.UpdateMethod, encoder common.Encoder) common.Agent {
 	var p = &AgentModelMap{
-		search:  search,
 		model:   modelMap,
+		search:  search,
+		update:  update,
 		encoder: encoder,
 	}
 	return p

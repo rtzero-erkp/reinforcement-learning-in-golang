@@ -45,14 +45,14 @@ func (p *BanditsEnv) Acts() common.Acts {
 	return p.acts
 }
 func (p *BanditsEnv) State() common.Info {
-	return p.state
+	return p.state.Clone()
 }
 func (p *BanditsEnv) Reset() (common.Info, common.Info) {
 	p.info.Clear()
 	for act := 0; act < p.banditsNum; act++ {
 		p.info.Set(fmt.Sprintf("ex%v", act), rand.Float64())
 	}
-	return p.state, p.info
+	return p.state.Clone(), p.info.Clone()
 }
 func (p *BanditsEnv) Step(act common.ActEnum) (res *common.Result) {
 	if !p.acts.Contain(act) {
@@ -60,10 +60,11 @@ func (p *BanditsEnv) Step(act common.ActEnum) (res *common.Result) {
 	}
 	var val = p.info.Get(fmt.Sprintf("ex%v", act)).(float64)
 	var reward = []float64{val}
-	return &common.Result{
-		State:  p.state,
+	res = &common.Result{
 		Reward: reward,
 		Done:   true,
-		Info:   p.info,
 	}
+	res.State = p.state.Clone()
+	res.Info = p.info.Clone()
+	return res
 }

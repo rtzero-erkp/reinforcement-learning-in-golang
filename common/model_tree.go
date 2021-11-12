@@ -2,6 +2,7 @@ package common
 
 import (
 	"fmt"
+	"log"
 )
 
 type ModelTreeNode struct {
@@ -31,17 +32,28 @@ func (p *ModelTreeNode) Find(path ...ActEnum) (node *ModelTreeNode) {
 	}
 	return node
 }
-func (p *ModelTreeNode) Sample(env Env, search *SearchParam) (act ActEnum) {
-	accum := NewAccumulate()
+func (p *ModelTreeNode) Exist(path ...ActEnum) (ok bool) {
+	node := p
+	for _, actI := range path {
+		node, ok = node.children[actI]
+		if !ok {
+			return
+		}
+	}
+	return ok
+}
+func (p *ModelTreeNode) Sample(env Env, search *SearchMethod) (act ActEnum) {
+	log.Fatalln("TODO")
+	acts := NewActsMax()
 	for _, actI := range env.Acts().All() {
 		node := p.get(actI)
 		if node.count == 0 {
 			return actI
 		} else {
-			accum.Add(actI, node.reward/node.count)
+			acts.Add(actI, node.reward/node.count)
 		}
 	}
-	act = accum.Sample(env.Acts(), search)
+	act = acts.Sample()
 	return act
 }
 func (p *ModelTreeNode) Update(reward float64) {
@@ -82,11 +94,11 @@ func (p *ModelTreeNode) get(act ActEnum) *ModelTreeNode {
 
 type ModelTree struct {
 	model  ModelEnum
-	update *UpdateParam
+	update *UpdateMethod
 	root   *ModelTreeNode
 }
 
-func NewModelTree(model ModelEnum, update *UpdateParam) *ModelTree {
+func NewModelTree(model ModelEnum, update *UpdateMethod) *ModelTree {
 	var o = &ModelTree{model: model, update: update, root: NewRootNode()}
 	return o
 }
