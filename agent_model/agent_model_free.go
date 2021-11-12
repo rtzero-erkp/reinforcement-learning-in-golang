@@ -22,7 +22,8 @@ func (p *AgentModelFree) Train(env common.Env, trainNum int) interface{} {
 		envCrt := env.Clone()
 		reward := 0.0
 		// target
-		target := p.accum.Sample(env.Space(), p.search)
+		acts := envCrt.Acts()
+		target := p.accum.Sample(acts, p.search)
 		act := target
 		// simulate
 		for {
@@ -31,15 +32,17 @@ func (p *AgentModelFree) Train(env common.Env, trainNum int) interface{} {
 			if res.Done {
 				break
 			}
-			act = env.Space().Sample()
+			acts = envCrt.Acts()
+			act = acts.Sample()
 		}
 		// train
 		p.accum.Add(target, reward)
 	}
+
 	return p.accum
 }
-func (p *AgentModelFree) Policy(env common.Env) (act common.ActionEnum) {
-	act = p.accum.Sample(env.Space(), common.NewSearchParam(common.SearchEnum_AvgQ))
+func (p *AgentModelFree) Policy(env common.Env) (act common.ActEnum) {
+	act = p.accum.Sample(env.Acts(), common.NewSearchParam(common.SearchEnum_AvgQ))
 	return
 }
 func NewModelFree(search *common.SearchParam) common.Agent {

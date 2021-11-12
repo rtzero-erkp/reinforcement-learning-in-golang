@@ -7,6 +7,7 @@ type Info interface {
 	Set(key string, val interface{})
 	String() string
 	Clone() Info
+	Clear()
 }
 
 var _ Info = &infoMap{}
@@ -41,4 +42,7 @@ func (p *infoMap) Clone() Info {
 		cp.m[k] = v
 	}
 	return cp
+}
+func (p *infoMap) Clear() {
+	p.m = map[string]interface{}{}
 }

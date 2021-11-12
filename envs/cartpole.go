@@ -24,7 +24,7 @@ type CartPoleEnv struct {
 	xRange               float64
 	state                common.Info
 	info                 common.Info
-	space                common.Space
+	acts                 common.Acts
 }
 
 func NewCartPoleEnv(xRange float64, thetaRange float64) common.Env {
@@ -46,7 +46,7 @@ func NewCartPoleEnv(xRange float64, thetaRange float64) common.Env {
 		xRange:               xRange,
 		state:                common.NewInfoMap(),
 		info:                 common.NewInfoMap(),
-		space: common.NewSpaceVecByEnum(
+		acts: common.NewActsVecByEnum(
 			common.ActionEnum_Left,
 			common.ActionEnum_Right,
 		),
@@ -54,6 +54,9 @@ func NewCartPoleEnv(xRange float64, thetaRange float64) common.Env {
 
 }
 
+func (p *CartPoleEnv) String() string {
+	return "CartPole"
+}
 func (p *CartPoleEnv) Clone() common.Env {
 	var cp = &CartPoleEnv{
 		gravity:              p.gravity,
@@ -69,19 +72,27 @@ func (p *CartPoleEnv) Clone() common.Env {
 		xRange:               p.xRange,
 		state:                p.state.Clone(),
 		info:                 p.info.Clone(),
-		space:                p.space.Clone(),
+		acts:                 p.acts.Clone(),
 	}
 	return cp
 }
-func (p *CartPoleEnv) Space() common.Space {
-	return p.space
+func (p *CartPoleEnv) Acts() common.Acts {
+	return p.acts
 }
-func (p *CartPoleEnv) String() string {
-	return "CartPole"
+func (p *CartPoleEnv) State() common.Info {
+	return p.state
 }
-func (p *CartPoleEnv) Step(act common.ActionEnum) (res *common.Result) {
-	if !p.space.Contain(act) {
-		log.Fatal(fmt.Sprintf("actions space not contain act:%v", act))
+func (p *CartPoleEnv) Reset() (common.Info, common.Info) {
+	p.state.Set("x", rand.Float64()*0.1-0.05)
+	p.state.Set("xDot", rand.Float64()*0.1-0.05)
+	p.state.Set("theta", rand.Float64()*0.1-0.05)
+	p.state.Set("thetaDot", rand.Float64()*0.1-0.05)
+	p.info.Set("step", 0)
+	return p.state, p.info
+}
+func (p *CartPoleEnv) Step(act common.ActEnum) (res *common.Result) {
+	if !p.acts.Contain(act) {
+		log.Fatal(fmt.Sprintf("actions acts not contain act:%v", act))
 	}
 
 	var force float64
@@ -140,18 +151,4 @@ func (p *CartPoleEnv) Step(act common.ActionEnum) (res *common.Result) {
 	}
 	res.Info = p.info
 	return res
-}
-func (p *CartPoleEnv) Reset() (common.Info, common.Info) {
-	p.state.Set("x", rand.Float64()*0.1-0.05)
-	p.state.Set("xDot", rand.Float64()*0.1-0.05)
-	p.state.Set("theta", rand.Float64()*0.1-0.05)
-	p.state.Set("thetaDot", rand.Float64()*0.1-0.05)
-	p.info.Set("step", 0)
-	return p.state, p.info
-}
-func (p *CartPoleEnv) Set(state common.Info) {
-	p.state = state
-}
-func (p *CartPoleEnv) State() common.Info {
-	return p.state
 }

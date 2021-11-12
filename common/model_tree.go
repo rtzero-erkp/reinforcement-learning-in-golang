@@ -6,7 +6,7 @@ import (
 
 type ModelTreeNode struct {
 	parent   *ModelTreeNode
-	children map[ActionEnum]*ModelTreeNode
+	children map[ActEnum]*ModelTreeNode
 
 	reward float64
 	count  float64
@@ -14,31 +14,34 @@ type ModelTreeNode struct {
 
 func NewRootNode() *ModelTreeNode {
 	return &ModelTreeNode{
-		children: map[ActionEnum]*ModelTreeNode{},
+		children: map[ActEnum]*ModelTreeNode{},
 	}
 }
 func NewMidNode(parent *ModelTreeNode) *ModelTreeNode {
 	return &ModelTreeNode{
 		parent:   parent,
-		children: map[ActionEnum]*ModelTreeNode{},
+		children: map[ActEnum]*ModelTreeNode{},
 	}
 }
 
-func (p *ModelTreeNode) Find(path ...ActionEnum) (node *ModelTreeNode) {
+func (p *ModelTreeNode) Find(path ...ActEnum) (node *ModelTreeNode) {
 	node = p
 	for _, actI := range path {
 		node = node.get(actI)
 	}
 	return node
 }
-func (p *ModelTreeNode) Sample(env Env, search *SearchParam) (act ActionEnum) {
+func (p *ModelTreeNode) Sample(env Env, search *SearchParam) (act ActEnum) {
 	accum := NewAccumulate()
-	for _, actI := range env.Space().Acts() {
+	for _, actI := range env.Acts().All() {
 		node := p.get(actI)
-		mean := node.reward / node.count
-		accum.Add(actI, mean)
+		if node.count == 0 {
+			return actI
+		} else {
+			accum.Add(actI, node.reward/node.count)
+		}
 	}
-	act = accum.Sample(env.Space(), search)
+	act = accum.Sample(env.Acts(), search)
 	return act
 }
 func (p *ModelTreeNode) Update(reward float64) {
@@ -61,7 +64,14 @@ func (p *ModelTreeNode) Update(reward float64) {
 		}
 	}
 }
-func (p *ModelTreeNode) get(act ActionEnum) *ModelTreeNode {
+func (p *ModelTreeNode) String() string {
+	var line = fmt.Sprintf("[node] pt:%p, reward:%v, count:%v, mean:%v\n", p, p.reward, p.count, p.reward/p.count)
+	for act, node := range p.children {
+		line += fmt.Sprintf("[node] pt:%p, act:%v, reward:%v, count:%v, mean:%v\n", node, act, node.reward, node.count, node.reward/node.count)
+	}
+	return line
+}
+func (p *ModelTreeNode) get(act ActEnum) *ModelTreeNode {
 	var node, ok = p.children[act]
 	if !ok {
 		node = NewMidNode(p)
@@ -81,17 +91,17 @@ func NewModelTree(model ModelEnum, update *UpdateParam) *ModelTree {
 	return o
 }
 
-func (p *ModelTree) Clear() {
+func (p *ModelTree) Reset() {
 	p.root = NewRootNode()
 }
 func (p *ModelTree) String() string {
 	var line = fmt.Sprintf("[model] model:%v, update:%v, root:%p\n", p.model, p.update, p.root)
 	return line
 }
-func (p *ModelTree) Find(path ...ActionEnum) (node *ModelTreeNode) {
+func (p *ModelTree) Find(path ...ActEnum) (node *ModelTreeNode) {
 	return p.root.Find(path...)
 }
-func (p *ModelTree) Move(path ...ActionEnum) {
+func (p *ModelTree) Move(path ...ActEnum) {
 	node := p.root
 	for _, actI := range path {
 		next := node.get(actI)

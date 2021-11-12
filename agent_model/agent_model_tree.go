@@ -24,9 +24,9 @@ func (p *AgentModelTree) Train(env common.Env, trainNum int) interface{} {
 		node := p.model.Find()
 		// sim to end
 		for {
-			act := node.Sample(env, p.search)
+			act := node.Sample(envCrt, p.search)
 			res := envCrt.Step(act)
-			node.Find(act)
+			node = node.Find(act)
 			reward += res.Reward[0]
 			if res.Done {
 				break
@@ -37,7 +37,7 @@ func (p *AgentModelTree) Train(env common.Env, trainNum int) interface{} {
 	}
 	return p.model
 }
-func (p *AgentModelTree) Policy(env common.Env) (act common.ActionEnum) {
+func (p *AgentModelTree) Policy(env common.Env) (act common.ActEnum) {
 	node := p.model.Find()
 	act = node.Sample(env, common.NewSearchParam(common.SearchEnum_AvgQ))
 	p.model.Move(act)

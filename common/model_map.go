@@ -8,29 +8,29 @@ import (
 type ModelMap struct {
 	model  ModelEnum
 	update *UpdateParam
-	nodes  map[string]interface{}
+	nodes  map[Code]interface{}
 }
 
 func NewModelMap(model ModelEnum, update *UpdateParam) *ModelMap {
-	var o = &ModelMap{model: model, update: update, nodes: map[string]interface{}{}}
+	var o = &ModelMap{model: model, update: update, nodes: map[Code]interface{}{}}
 	return o
 }
 
-func (p *ModelMap) Clear() {
-	p.nodes = map[string]interface{}{}
+func (p *ModelMap) Reset() {
+	p.nodes = map[Code]interface{}{}
 }
 func (p *ModelMap) String() string {
 	var line = fmt.Sprintf("[model] model:%v, update:%v\n", p.model, p.update)
 	return line
 }
-func (p *ModelMap) Sample(env Env, encoder Encoder, search *SearchParam) (act ActionEnum) {
+func (p *ModelMap) Sample(env Env, encoder Encoder, search *SearchParam) (act ActEnum) {
 	switch p.model {
 	case NodeEnum_Value:
 		act = p.sampleV(env, encoder, search)
 	case NodeEnum_Q:
 		act = p.sampleQ(env, encoder, search)
 	default:
-		act = env.Space().Sample()
+		act = env.Acts().Sample()
 	}
 	return act
 }
@@ -43,22 +43,28 @@ func (p *ModelMap) Update(mem *MemoryCode) {
 	}
 }
 
-func (p *ModelMap) sampleV(env Env, encoder Encoder, search *SearchParam) (act ActionEnum) {
+func (p *ModelMap) sampleV(env Env, encoder Encoder, search *SearchParam) (act ActEnum) {
 	accum := NewAccumulate()
-	for _, actI := range env.Space().Acts() {
+	for _, actI := range env.Acts().All() {
 		envCrt := env.Clone()
 		res := envCrt.Step(actI)
 		code := encoder.Hash(res.State)
 		reward := p.getV(code)
 		accum.Add(actI, reward)
 	}
-	act = accum.Sample(env.Space(), search)
+	act = accum.Sample(env.Acts(), search)
 	return
 }
-func (p *ModelMap) sampleQ(env Env, encoder Encoder, search *SearchParam) (act ActionEnum) {
+func (p *ModelMap) sampleQ(env Env, encoder Encoder, search *SearchParam) (act ActEnum) {
+	//log.Printf("[model] acts:%v", env.Acts())
+	//log.Printf("[model] state:%v", env.State())
+	//log.Printf("[model] encoder:%v", encoder)
 	code := encoder.Hash(env.State())
+	//log.Printf("[model] code:%v", code)
 	accum := p.getQ(code)
-	act = accum.Sample(env.Space(), search)
+	//log.Printf("[model] accum:%v", accum)
+	act = accum.Sample(env.Acts(), search)
+	//log.Printf("[model] act:%v", act)
 	return act
 }
 func (p *ModelMap) updateV(mem *MemoryCode) {
@@ -82,7 +88,7 @@ func (p *ModelMap) updateQ(mem *MemoryCode) {
 	accum := p.getQ(code)
 	accum.Add(mem.Act, mem.Reward)
 }
-func (p *ModelMap) getV(code string) float64 {
+func (p *ModelMap) getV(code Code) float64 {
 	var reward, ok = p.nodes[code]
 	if !ok {
 		reward = 0.0
@@ -90,7 +96,7 @@ func (p *ModelMap) getV(code string) float64 {
 	}
 	return reward.(float64)
 }
-func (p *ModelMap) getQ(code string) Accumulate {
+func (p *ModelMap) getQ(code Code) Accumulate {
 	var accum, ok = p.nodes[code]
 	if !ok {
 		accum = NewAccumulate()

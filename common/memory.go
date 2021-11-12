@@ -2,15 +2,15 @@ package common
 
 type Memory struct {
 	From   Info
-	Act    ActionEnum
+	Act    ActEnum
 	To     Info
 	Reward float64
 }
 
 type MemoryCode struct {
-	From   string
-	Act    ActionEnum
-	To     string
+	From   Code
+	Act    ActEnum
+	To     Code
 	Reward float64
 }
 
@@ -23,7 +23,7 @@ func NewMem() *Mem {
 		mem: []*Memory{},
 	}
 }
-func (p *Mem) Add(from Info, act ActionEnum, to Info, reward float64) {
+func (p *Mem) Add(from Info, act ActEnum, to Info, reward float64) {
 	var mem = &Memory{
 		From:   from.Clone(),
 		Act:    act,
@@ -47,7 +47,7 @@ func NewMemCode() *MemCode {
 		mem: []*MemoryCode{},
 	}
 }
-func (p *MemCode) Add(from string, act ActionEnum, to string, reward float64) {
+func (p *MemCode) Add(from Code, act ActEnum, to Code, reward float64) {
 	var mem = &MemoryCode{
 		From:   from,
 		Act:    act,

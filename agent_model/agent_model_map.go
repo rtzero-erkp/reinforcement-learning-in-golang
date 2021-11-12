@@ -19,16 +19,18 @@ func (p *AgentModelMap) String() string {
 func (p *AgentModelMap) Train(env common.Env, trainNum int) interface{} {
 	var res *common.Result
 	mem := common.NewMemCode()
-	p.model.Clear()
 
 	for i0 := 0; i0 < trainNum; i0++ {
+		//log.Printf("[agent] ===[i0:%v]===", i0)
 		// reset
 		mem.Clear()
 		var envCrt = env.Clone()
-		state := env.State()
+		state := envCrt.State()
 		// sim to end
 		for {
-			act := p.model.Sample(env, p.encoder, p.search)
+			//log.Println("[agent] ===[step]===")
+			act := p.model.Sample(envCrt, p.encoder, p.search)
+			//log.Printf("[agent] act:%10v, acts:%v", act, envCrt.Acts())
 			res = envCrt.Step(act)
 			mem.Add(p.encoder.Hash(state), act, p.encoder.Hash(res.State), res.Reward[0])
 			state = res.State
@@ -49,7 +51,7 @@ func (p *AgentModelMap) Train(env common.Env, trainNum int) interface{} {
 	}
 	return p.model
 }
-func (p *AgentModelMap) Policy(env common.Env) (act common.ActionEnum) {
+func (p *AgentModelMap) Policy(env common.Env) (act common.ActEnum) {
 	return p.model.Sample(env, p.encoder, common.NewSearchParam(common.SearchEnum_AvgQ))
 }
 func NewModelMap(modelMap *common.ModelMap, search *common.SearchParam, encoder common.Encoder) common.Agent {

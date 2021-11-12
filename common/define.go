@@ -2,37 +2,40 @@ package common
 
 import "fmt"
 
-type ActionEnum string
+type ActEnum string
 
 const (
-	ActionEnum_Up    ActionEnum = "Up"
-	ActionEnum_Down  ActionEnum = "Down"
-	ActionEnum_Right ActionEnum = "Right"
-	ActionEnum_Left  ActionEnum = "Left"
+	ActionEnum_Up    ActEnum = "Up"
+	ActionEnum_Down  ActEnum = "Down"
+	ActionEnum_Right ActEnum = "Right"
+	ActionEnum_Left  ActEnum = "Left"
 
-	ActionEnum_Card2 ActionEnum = "Card2"
-	ActionEnum_Card3 ActionEnum = "Card3"
-	ActionEnum_Card4 ActionEnum = "Card4"
-	ActionEnum_Card5 ActionEnum = "Card5"
-	ActionEnum_Card6 ActionEnum = "Card6"
-	ActionEnum_Card7 ActionEnum = "Card7"
-	ActionEnum_Card8 ActionEnum = "Card8"
-	ActionEnum_Card9 ActionEnum = "Card9"
-	ActionEnum_CardT ActionEnum = "CardT"
-	ActionEnum_CardJ ActionEnum = "CardJ"
-	ActionEnum_CardQ ActionEnum = "CardQ"
-	ActionEnum_CardK ActionEnum = "CardK"
-	ActionEnum_CardA ActionEnum = "CardA"
+	ActionEnum_Card2 ActEnum = "Card2"
+	ActionEnum_Card3 ActEnum = "Card3"
+	ActionEnum_Card4 ActEnum = "Card4"
+	ActionEnum_Card5 ActEnum = "Card5"
+	ActionEnum_Card6 ActEnum = "Card6"
+	ActionEnum_Card7 ActEnum = "Card7"
+	ActionEnum_Card8 ActEnum = "Card8"
+	ActionEnum_Card9 ActEnum = "Card9"
+	ActionEnum_CardT ActEnum = "CardT"
+	ActionEnum_CardJ ActEnum = "CardJ"
+	ActionEnum_CardQ ActEnum = "CardQ"
+	ActionEnum_CardK ActEnum = "CardK"
+	ActionEnum_CardA ActEnum = "CardA"
 
-	ActionEnum_Fold  ActionEnum = "Fold"
-	ActionEnum_Check ActionEnum = "Check"
-	ActionEnum_Call  ActionEnum = "Call"
-	ActionEnum_Bet   ActionEnum = "Bet"
-	ActionEnum_AllIn ActionEnum = "AllIn"
+	ActionEnum_Fold  ActEnum = "Fold"
+	ActionEnum_Check ActEnum = "Check"
+	ActionEnum_Call  ActEnum = "Call"
+	ActionEnum_Bet   ActEnum = "Bet"
+	ActionEnum_AllIn ActEnum = "AllIn"
 )
 
-func (p ActionEnum) String() string {
+func (p ActEnum) String() string {
 	return string(p)
+}
+func (p ActEnum) Same(a ActEnum) bool {
+	return string(p) == string(a)
 }
 
 const (

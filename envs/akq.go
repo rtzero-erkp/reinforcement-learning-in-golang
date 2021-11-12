@@ -31,30 +31,39 @@ import (
  */
 
 type AKQEnv struct {
-	state common.Info  // 玩家状态
-	info  common.Info  // 游戏信息
-	space common.Space // 行动空间
+	state common.Info // 玩家状态
+	info  common.Info // 游戏信息
+	acts  common.Acts // 行动空间
 }
 
 func NewAKQEnv(P float64) common.Env {
 	o := &AKQEnv{
 		state: common.NewInfoMap(),
 		info:  common.NewInfoMap(),
-		space: common.NewSpaceVecByEnum(),
+		acts:  common.NewActsVecByEnum(),
 	}
 
 	o.info.Set("P", P)
 	return o
 }
 
+func (p *AKQEnv) String() string {
+	return "AKQ"
+}
 func (p *AKQEnv) Clone() common.Env {
 	var cp = &AKQEnv{
 		state: p.state.Clone(),
 		info:  p.info.Clone(),
-		space: p.space.Clone(),
+		acts:  p.acts.Clone(),
 	}
 
 	return cp
+}
+func (p *AKQEnv) Acts() common.Acts {
+	return p.acts
+}
+func (p *AKQEnv) State() common.Info {
+	return p.state
 }
 func (p *AKQEnv) Reset() (common.Info, common.Info) {
 	var dealt = []common.CardEnum{common.CardEnum_CardA, common.CardEnum_CardK, common.CardEnum_CardQ}
@@ -67,18 +76,13 @@ func (p *AKQEnv) Reset() (common.Info, common.Info) {
 	p.state.Set(common.PlayerEnum_1, dealt[0])
 	p.state.Set(common.PlayerEnum_2, dealt[1])
 	p.state.Set("crt", common.PlayerEnum_1)
-	p.space.SetByEnum(common.ActionEnum_Bet, common.ActionEnum_Fold)
+	p.acts.Clear()
+	p.acts.AddEnum(common.ActionEnum_Bet, common.ActionEnum_Fold)
 	return p.state, p.info
 }
-func (p *AKQEnv) Space() common.Space {
-	return p.space
-}
-func (p *AKQEnv) String() string {
-	return "AKQ"
-}
-func (p *AKQEnv) Step(act common.ActionEnum) (res *common.Result) {
-	if !p.space.Contain(act) {
-		log.Fatal(fmt.Sprintf("actions space not contain act:%v", act))
+func (p *AKQEnv) Step(act common.ActEnum) (res *common.Result) {
+	if !p.acts.Contain(act) {
+		log.Fatal(fmt.Sprintf("actions acts not contain act:%v", act))
 	}
 
 	var player = p.state.Get("crt").(string)
@@ -95,7 +99,8 @@ func (p *AKQEnv) Step(act common.ActionEnum) (res *common.Result) {
 			return
 		} else
 		if act == common.ActionEnum_Bet {
-			p.space.SetByEnum(common.ActionEnum_Fold, common.ActionEnum_Call)
+			p.acts.Clear()
+			p.acts.AddEnum(common.ActionEnum_Fold, common.ActionEnum_Call)
 			p.state.Set("crt", common.PlayerEnum_2)
 			res.Done = false
 			res.Reward = []float64{}
@@ -127,10 +132,4 @@ func (p *AKQEnv) Step(act common.ActionEnum) (res *common.Result) {
 	}
 	log.Fatal("unknown error")
 	return
-}
-func (p *AKQEnv) Set(state common.Info) {
-	p.state = state
-}
-func (p *AKQEnv) State() common.Info {
-	return p.state
 }

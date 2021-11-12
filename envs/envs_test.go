@@ -14,21 +14,25 @@ func TestEnvs0(t *testing.T) {
 		envs = []common.Env{
 			NewBanditsEnv(5),
 			NewCartPoleEnv(2.4, 12),
+			NewMazeEnv(3, 3),
 			NewAKQEnv(3),
 		}
 	)
 	for _, env := range envs {
-		Convey(fmt.Sprintf("TestEnvs0:%v", env), t, func() {
-			log.Printf("TestEnvs0:%v", env)
+		Convey(fmt.Sprintf("[TestEnvs0] env:%v", env), t, func() {
+			log.Printf("[TestEnvs0] env:%v", env)
 			env.Reset()
+			step := 0
 			for {
-				var act = env.Space().Sample()
+				step += 1
+				var act = env.Acts().Sample()
 				res = env.Step(act)
 				if res.Done {
 					break
 				}
 			}
-			log.Println(res)
+			log.Print(res)
+			log.Printf("step:%v", step)
 		})
 	}
 }
