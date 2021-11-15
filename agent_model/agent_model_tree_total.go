@@ -10,6 +10,7 @@ var _ common.Agent = &AgentModelTree{}
 type AgentModelTree struct {
 	search *common.SearchMethod
 	model  *common.ModelTree
+	update *common.UpdateMethod
 }
 
 func (p *AgentModelTree) String() string {
@@ -43,9 +44,12 @@ func (p *AgentModelTree) Policy(env common.Env) (act common.ActEnum) {
 	p.model.Move(act)
 	return
 }
-func NewModelTree(modelTree *common.ModelTree, search *common.SearchMethod) common.Agent {
+func NewModelTree(modelTree *common.ModelTree,
+	search *common.SearchMethod,
+	update *common.UpdateMethod) common.Agent {
 	var p = &AgentModelTree{
 		search: search,
+		update: update,
 		model:  modelTree,
 	}
 	return p

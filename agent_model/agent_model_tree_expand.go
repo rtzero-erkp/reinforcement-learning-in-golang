@@ -10,6 +10,7 @@ var _ common.Agent = &AgentModelTreeExpand{}
 type AgentModelTreeExpand struct {
 	search *common.SearchMethod
 	model  *common.ModelTree
+	update *common.UpdateMethod
 }
 
 func (p *AgentModelTreeExpand) String() string {
@@ -54,9 +55,12 @@ func (p *AgentModelTreeExpand) Policy(env common.Env) (act common.ActEnum) {
 	p.model.Move(act)
 	return
 }
-func NewModelTreeExpand(modelTree *common.ModelTree, search *common.SearchMethod) common.Agent {
+func NewModelTreeExpand(modelTree *common.ModelTree,
+	search *common.SearchMethod,
+	update *common.UpdateMethod) common.Agent {
 	var p = &AgentModelTreeExpand{
 		search: search,
+		update: update,
 		model:  modelTree,
 	}
 	return p

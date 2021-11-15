@@ -19,10 +19,10 @@ func Test_model_tree_expand_0(t *testing.T) {
 		search_UCB          = common.NewSearchMethod(common.SearchEnum_UCB)
 		modelTree           = common.NewModelTree(common.NodeEnum_Q, update_AvgQ)
 		agents              = []common.Agent{
-			NewModelTreeExpand(modelTree, search_MC),
-			NewModelTreeExpand(modelTree, search_EpsilonGreed),
-			NewModelTreeExpand(modelTree, search_SoftMax),
-			NewModelTreeExpand(modelTree, search_UCB),
+			NewModelTreeExpand(modelTree, search_MC, update_AvgQ),
+			NewModelTreeExpand(modelTree, search_EpsilonGreed, update_AvgQ),
+			NewModelTreeExpand(modelTree, search_SoftMax, update_AvgQ),
+			NewModelTreeExpand(modelTree, search_UCB, update_AvgQ),
 		}
 	)
 	Convey(fmt.Sprintf("[Test_model_tree_expand_0] env:%v", env), t, func() {
@@ -58,10 +58,10 @@ func Test_model_tree_expand_1(t *testing.T) {
 		search_UCB          = common.NewSearchMethod(common.SearchEnum_UCB)
 		modelTree           = common.NewModelTree(common.NodeEnum_Q, update_AvgQ)
 		agents              = []common.Agent{
-			NewModelTreeExpand(modelTree, search_MC),
-			NewModelTreeExpand(modelTree, search_EpsilonGreed),
-			NewModelTreeExpand(modelTree, search_SoftMax),
-			NewModelTreeExpand(modelTree, search_UCB),
+			NewModelTreeExpand(modelTree, search_MC, update_AvgQ),
+			NewModelTreeExpand(modelTree, search_EpsilonGreed, update_AvgQ),
+			NewModelTreeExpand(modelTree, search_SoftMax, update_AvgQ),
+			NewModelTreeExpand(modelTree, search_UCB, update_AvgQ),
 		}
 	)
 	Convey(fmt.Sprintf("[Test_model_tree_expand_1] env:%v", env), t, func() {
@@ -91,18 +91,18 @@ func Test_model_tree_expand_1(t *testing.T) {
 func Test_model_tree_expand_2(t *testing.T) {
 	var (
 		// 不推荐使用Tree方式, 导致内存不可控
-		env         = envs.NewMazeEnv(3, 3)
-		update_AvgQ = common.NewUpdateMethod(common.UpdateEnum_AvgQ)
-		//search_MC           = common.NewSearchMethod(common.SearchEnum_MC)
-		//search_EpsilonGreed = common.NewSearchMethod(common.SearchEnum_EpsilonGreed, 0.5)
-		//search_SoftMax      = common.NewSearchMethod(common.SearchEnum_SoftMax, 0.5)
-		//search_UCB          = common.NewSearchMethod(common.SearchEnum_UCB)
-		modelTree = common.NewModelTree(common.NodeEnum_Q, update_AvgQ)
-		agents    = []common.Agent{
-			//NewModelTreeExpand(modelTree, search_MC),
-			//NewModelTreeExpand(modelTree, search_EpsilonGreed),
-			//NewModelTreeExpand(modelTree, search_SoftMax),
-			//NewModelTreeExpand(modelTree, search_UCB),
+		env                 = envs.NewMazeEnv(3, 3)
+		update_AvgQ         = common.NewUpdateMethod(common.UpdateEnum_AvgQ)
+		search_MC           = common.NewSearchMethod(common.SearchEnum_MC)
+		search_EpsilonGreed = common.NewSearchMethod(common.SearchEnum_EpsilonGreed, 0.5)
+		search_SoftMax      = common.NewSearchMethod(common.SearchEnum_SoftMax, 0.5)
+		search_UCB          = common.NewSearchMethod(common.SearchEnum_UCB)
+		modelTree           = common.NewModelTree(common.NodeEnum_Q, update_AvgQ)
+		agents              = []common.Agent{
+			NewModelTreeExpand(modelTree, search_MC, update_AvgQ),
+			NewModelTreeExpand(modelTree, search_EpsilonGreed, update_AvgQ),
+			NewModelTreeExpand(modelTree, search_SoftMax, update_AvgQ),
+			NewModelTreeExpand(modelTree, search_UCB, update_AvgQ),
 		}
 	)
 	Convey(fmt.Sprintf("[Test_model_tree_expand_2] env:%v", env), t, func() {

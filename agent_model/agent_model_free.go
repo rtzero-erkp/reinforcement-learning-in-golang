@@ -24,6 +24,7 @@ func (p *AgentModelFree) Train(env common.Env, trainNum int) interface{} {
 		// target
 		acts := envCrt.Acts()
 		target := p.search.Accum(p.accum, acts)
+		//log.Printf("target:%v", target)
 		act := target
 		// simulate
 		for {
@@ -42,6 +43,7 @@ func (p *AgentModelFree) Train(env common.Env, trainNum int) interface{} {
 	return p.accum
 }
 func (p *AgentModelFree) Policy(env common.Env) (act common.ActEnum) {
+	//log.Println(p.accum)
 	act = common.SearchArgQ.Accum(p.accum, env.Acts())
 	return
 }

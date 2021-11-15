@@ -35,6 +35,8 @@ func (p *AgentModelMap) Train(env common.Env, trainNum int) interface{} {
 			//	log.Println("[agent] ===[first]===")
 			//}
 			act := p.model.Sample(envCrt, p.encoder, p.search)
+			//log.Printf("[Mark]")
+			//log.Printf("act:%v", act)
 			//if first {
 			//log.Printf("[agent] act:%10v, acts:%v", act, envCrt.Acts())
 			//	log.Println("[agent] ---[first]---")
@@ -78,7 +80,10 @@ func (p *AgentModelMap) Policy(env common.Env) (act common.ActEnum) {
 	//log.Println(node)
 	return
 }
-func NewModelMap(modelMap *common.ModelMap, search *common.SearchMethod, update *common.UpdateMethod, encoder common.Encoder) common.Agent {
+func NewModelMap(modelMap *common.ModelMap,
+	search *common.SearchMethod,
+	update *common.UpdateMethod,
+	encoder common.Encoder) common.Agent {
 	var p = &AgentModelMap{
 		model:   modelMap,
 		search:  search,

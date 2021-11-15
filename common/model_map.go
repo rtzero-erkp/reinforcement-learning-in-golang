@@ -32,9 +32,9 @@ func (p *ModelMap) String() string {
 func (p *ModelMap) Sample(env Env, encoder Encoder, search *SearchMethod) (act ActEnum) {
 	switch p.model {
 	case NodeEnum_Value:
-		search.QMap(env, encoder, p)
+		act = search.VMap(env, encoder, p)
 	case NodeEnum_Q:
-		search.QMap(env, encoder, p)
+		act = search.QMap(env, encoder, p)
 	default:
 		act = env.Acts().Sample()
 	}

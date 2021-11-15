@@ -11,16 +11,16 @@ import (
 
 func Test_model_free_0(t *testing.T) {
 	var (
-		env       = envs.NewBanditsEnv(5)
-		search_MC = common.NewSearchMethod(common.SearchEnum_MC)
-		//search_EpsilonGreed = common.NewSearchMethod(common.SearchEnum_EpsilonGreed, 0.5)
-		//search_SoftMax      = common.NewSearchMethod(common.SearchEnum_SoftMax, 0.5)
-		//search_UCB          = common.NewSearchMethod(common.SearchEnum_UCB)
-		agents = []common.Agent{
+		env                 = envs.NewBanditsEnv(5)
+		search_MC           = common.NewSearchMethod(common.SearchEnum_MC)
+		search_EpsilonGreed = common.NewSearchMethod(common.SearchEnum_EpsilonGreed, 0.5)
+		search_SoftMax      = common.NewSearchMethod(common.SearchEnum_SoftMax, 0.5)
+		search_UCB          = common.NewSearchMethod(common.SearchEnum_UCB)
+		agents              = []common.Agent{
 			NewModelFree(search_MC),
-			//NewModelFree(search_EpsilonGreed),
-			//NewModelFree(search_SoftMax),
-			//NewModelFree(search_UCB),
+			NewModelFree(search_EpsilonGreed),
+			NewModelFree(search_SoftMax),
+			NewModelFree(search_UCB),
 		}
 	)
 	Convey(fmt.Sprintf("[Test_model_free_0] env:%v", env), t, func() {
